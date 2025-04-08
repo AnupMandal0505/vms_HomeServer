@@ -1,0 +1,136 @@
+{% extends 'landing/base.html' %}
+{% load static %}
+
+{% block title %}
+<title>Home</title>
+   
+{% endblock title %}
+{% block style  %}
+    
+{% endblock style %}
+{% block conatain %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Modern Visitor Management Made Simple</h1>
+                <p class="lead mb-4">Streamline your visitor check-in process, enhance security, and create a
+                    professional first impression with our digital visitor management system.</p>
+                <div class="d-flex gap-3">
+                    <a href="/" class="btn btn-primary">Get Started</a>
+                    <a href="/" class="btn btn-outline-secondary">Learn More</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img src="{% static 'app_img/logo.png' %}" alt="VMS Dashboard" style="width: 200px;" class="img-fluid rounded-4 shadow-lg">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5" id="features">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Powerful Features</h2>
+            <p class="text-muted">Everything you need to manage visitors effectively</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <i data-lucide="user-check" class="feature-icon"></i>
+                    <h3 class="h5 mb-3">Quick Check-in</h3>
+                    <p class="text-muted mb-0">Streamlined digital check-in process with customizable forms and ID
+                        scanning.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <i data-lucide="shield-check" class="feature-icon"></i>
+                    <h3 class="h5 mb-3">Enhanced Security</h3>
+                    <p class="text-muted mb-0">Real-time visitor tracking, watch lists, and automatic notifications.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <i data-lucide="bar-chart" class="feature-icon"></i>
+                    <h3 class="h5 mb-3">Analytics</h3>
+                    <p class="text-muted mb-0">Comprehensive reporting and insights on visitor traffic patterns.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-number">1M+</div>
+                    <div>Visitors Processed</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-number">5000+</div>
+                    <div>Active Locations</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-number">99.9%</div>
+                    <div>Uptime</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5" id="how-it-works">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">How It Works</h2>
+            <p class="text-muted">Get started in three simple steps</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3 class="h5 mb-3">Setup Your Account</h3>
+                    <p class="text-muted mb-0">Quick and easy setup process with customizable options for your needs.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3 class="h5 mb-3">Configure Workflow</h3>
+                    <p class="text-muted mb-0">Set up your check-in forms, notifications, and security protocols.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3 class="h5 mb-3">Go Live</h3>
+                    <p class="text-muted mb-0">Start managing visitors with our intuitive digital system.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta">
+    <div class="container text-center">
+        <h2 class="display-5 fw-bold mb-4">Ready to Transform Your Visitor Management?</h2>
+        <p class="lead mb-4">Join thousands of organizations that trust VisiTrack</p>
+        <a href="/" class="btn btn-light btn-lg">Request Demo</a>
+    </div>
+</section>
+
+
+{% endblock conatain %}

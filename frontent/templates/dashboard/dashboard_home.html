@@ -1,0 +1,111 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block head %}
+<!-- FontAwesome for Icons -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+    .stat-card {
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .stat-card i {
+        font-size: 30px;
+        margin-bottom: 5px;
+    }
+    .bg-gm {
+        background: linear-gradient(135deg, #ff8a00, #e52e71);
+    }
+    .bg-pa {
+        background: linear-gradient(135deg, #00b4db, #0083b0);
+    }
+    .bg-active {
+        background: linear-gradient(135deg, #38ef7d, #11998e);
+    }
+
+  
+    .alert {
+  position: fixed;
+  /* top: 40px;           */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;         
+  /* width: auto;          */
+}
+
+</style>
+
+    
+{% endblock head %}
+{% block content %}
+{% if messages %}
+    <!-- <div class="alert alert-danger" role="alert" > -->
+      {% for message in messages %}
+      <div class="alert mt-4 alert-success alert-dismissible fade show" id="alertMessage">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <strong>Success!</strong> {{message}}.
+      </div>
+      {% endfor %}
+    <!-- </div> -->
+{% endif %}
+
+
+    <!-- Your page content here -->
+
+
+    <div class="bg-light mt-5 pb-5">
+
+        <div class="container pt-5">
+            <div class="row g-3">
+                <!-- General Manager Card -->
+                <div class="col-md-4">
+                    <div class="stat-card bg-gm">
+                        <i class="fas fa-user-tie"></i>
+                        <h4>Total General Managers</h4>
+                        <h3 id="gmCount">{{gm_count}}</h3>
+                    </div>
+                </div>
+    
+                <!-- Personal Assistant Card -->
+                <div class="col-md-4">
+                    <div class="stat-card bg-pa">
+                        <i class="fas fa-user"></i>
+                        <h4>Total Personal Assistants</h4>
+                        <h3 id="paCount">{{pa_count}}</h3>
+                    </div>
+                </div>
+    
+                <!-- Active Users Card -->
+                <div class="col-md-4">
+                    <div class="stat-card bg-active">
+                        <i class="fas fa-users"></i>
+                        <h4>Active Users</h4>
+                        <h3 id="activeUsers">{{active_users}}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <script>
+            $(document).ready(function() {
+              // Wait 5 seconds (5000 milliseconds) then fade out the alert slowly
+              setTimeout(function(){
+                $("#alertMessage").fadeOut("slow");
+              }, 3000);
+            });
+          </script>
+          
+        <!-- Bootstrap JS -->
+        <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+    
+    </div>
+    
+{% endblock %}

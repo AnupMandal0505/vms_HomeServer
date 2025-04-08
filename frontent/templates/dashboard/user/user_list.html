@@ -1,0 +1,583 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Dashboard | GM List{% endblock %}
+
+{% block head %}
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+
+<!-- DataTables Buttons CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+<!-- FontAwesome for Icons -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+
+<style>
+      /* ✅ Card ke upar border */
+      .card {
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        position: relative; /* ✅ Ensures the pseudo-element positions correctly */
+        border-radius: 5px; /* ✅ Rounded corners */
+        overflow: hidden; /* ✅ Keeps the border within the card */
+    }
+
+    /* ✅ Top Border */
+    .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px; /* ✅ Border thickness */
+        background-color: #007bff; /* ✅ Blue color (Change as needed) */
+        border-top-left-radius: 5px; /* ✅ Smooth edges */
+        border-top-right-radius: 5px;
+    }
+    
+    .dt-buttons .btn {
+        margin-right: 5px;
+        border-radius: 8px;
+    }
+
+    .dt-buttons .btn-copy {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .dt-buttons .btn-csv {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .dt-buttons .btn-excel {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .dt-buttons .btn-pdf {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .dt-buttons .btn-print {
+        background-color: #ffc107;
+        color: black;
+    }
+
+    .dt-buttons .btn:hover {
+        opacity: 0.8;
+    }
+</style>
+{% endblock head %}
+
+
+{% block content %}
+{% if messages %}
+<div class="alert alert-danger" role="alert">
+    {% for message in messages %}
+    <p class="mb-0">{{ message }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+
+<div class="bg-light">
+
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">{% if roles == "GM" %}
+            General Manager List
+            {% elif roles == "SECRETARY" %}
+            Secretary List
+            {% else %}
+            Personal Assit. List
+            {% endif %}</h2>
+
+        <div class="card shadow p-3">
+            <table id="userTable" class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        {% if roles == "PA" %}
+                        <th>GM</th>
+                        {% endif %}
+                        <th>Pass Key</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lis in data_users %}
+                    <tr>
+                        <td>{{ lis.phone }}</td>
+                        <td>{{ lis.first_name }} {{ lis.last_name }}</td>
+                        <td>{{ lis.email }}</td>
+                        <td>{{ lis.phone }}</td>
+                        <td>
+                             {% for group in lis.groups.all %}
+                             {{ group.name }}{% if not forloop.last %}, {% endif %}
+                         {% endfor %}
+                        </td>
+                        {% if roles == "PA" %}
+                        <td>{{ lis.gm }}</td>
+
+                        {% endif %}
+
+                        <td>
+                            {% if lis.pass_key %}
+                            {{lis.pass_key}}
+                            {% else %}
+                            <a class="btn btn-sm btn-warning add-passkey-btn"
+                                onclick="setPasskeyModalData('{{ lis.phone }}')">
+                                <i class="fas fa-plus"></i> Add Passkey
+                            </a>
+
+
+                            {% endif %}
+
+                        </td>
+                        <td>
+                            <a class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#editUserModal" onclick="setEditModalData(
+                                    '{{ lis.id }}',
+                                    '{{ lis.first_name }}',
+                                    '{{ lis.last_name }}',
+                                    '{% for role in lis.roles.all %}{% if not forloop.first %}, {% endif %}{{ role.name }}{% endfor %}',
+                                    '{{ lis.gm.id }}'
+                                )">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        
+                            <a class="btn btn-sm btn-danger" href="{{ lis.id }}">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                        
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{% url 'frontent:update_user_urls' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" id="user_id">
+
+                        <div class="mb-3">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" name="first_name" id="first_name" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" name="last_name" id="last_name" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Role</label>
+                            <select class="form-control" name="role" id="role">
+                                <option value="gm">General Manager</option>
+                                <option value="secretary">Secretary</option>
+                                <option value="pa">Personal Assistant</option>
+                                <option value="op">Operator</option>
+                            </select>
+                        </div>
+
+                        {% if roles == "pa" %}
+
+                        <div class="mb-3">
+                            <label for="gm" class="form-label">Assign GM</label>
+                            <select id="gm" name="gm" class="form-select" required>
+                                {% for user in gm_list %}
+                                <option value="{{ user.id }}">
+                                    {{ user.first_name }} {{ user.last_name }} -
+                                    {% for role in user.roles.all %}
+                                    {{ role }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        function setEditModalData(userId, firstName, lastName, role, gm) {
+            document.getElementById("user_id").value = userId;
+            document.getElementById("first_name").value = firstName;
+            document.getElementById("last_name").value = lastName;
+            document.getElementById("role").value = role;
+
+            // Clear any previous selections
+            for (let i = 0; i < roleSelect.options.length; i++) {
+                roleSelect.options[i].selected = false;
+            }
+
+            // Convert the comma-separated roles string into an array and trim whitespace
+            const roleArray = roles.split(',').map(item => item.trim());
+
+            // Loop through each option and set selected if its value is in the roleArray
+            for (let i = 0; i < roleSelect.options.length; i++) {
+                if (roleArray.includes(roleSelect.options[i].value)) {
+                    roleSelect.options[i].selected = true;
+                }
+            }
+
+            document.getElementById("gm").value = gm;
+        }
+    </script>
+
+    <!-- Passkey Modal -->
+    <div class="modal fade" id="passkeyModal" tabindex="-1" aria-labelledby="passkeyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-key me-2"></i> Enter Pass Key</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="passkeyForm">
+                        <input type="text" id="passkeyUserId" hidden >
+                        <!-- <input type="hidden" id="storedPasskey" value=""> Store Passkey -->
+
+                        <div class="mb-3">
+                            <label for="passkeyInput" class="form-label">Paste Pass Key</label>
+                            <div class="input-group">
+                                <input type="text" id="passkeyInput" name="pass_key" class="form-control"
+                                    placeholder="Paste your passkey here">
+                            </div>
+                            <small class="error-msg text-danger" id="errorMsg" style="display: none;">Invalid
+                                Passkey</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OTP Modal -->
+    <div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-lock me-2"></i> Enter OTP</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="otpForm">
+                        <input type="text" id="storePasskeyUserId" value="" name="user_id" hidden>
+                        <input type="text" id="storedPasskey" value="" hidden>
+
+                        <div class="mb-3">
+                            <label for="otpInput" class="form-label">Enter OTP</label>
+                            <input type="text" id="otpInput" name="otp" class="form-control" placeholder="Enter OTP"
+                                required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Verify OTP</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <script>
+        function setEditModalData(userId, firstName, lastName, role, gm) {
+            document.getElementById("user_id").value = userId;
+            document.getElementById("first_name").value = firstName;
+            document.getElementById("last_name").value = lastName;
+            document.getElementById("role").value = role;
+
+            // Clear any previous selections
+            for (let i = 0; i < roleSelect.options.length; i++) {
+                roleSelect.options[i].selected = false;
+            }
+
+            // Convert the comma-separated roles string into an array and trim whitespace
+            const roleArray = roles.split(',').map(item => item.trim());
+
+            // Loop through each option and set selected if its value is in the roleArray
+            for (let i = 0; i < roleSelect.options.length; i++) {
+                if (roleArray.includes(roleSelect.options[i].value)) {
+                    roleSelect.options[i].selected = true;
+                }
+            }
+
+            document.getElementById("gm").value = gm;
+        }
+
+
+        // passkey model pass data
+        function setPasskeyModalData(passkeyUserId) {
+            document.getElementById("passkeyUserId").value = passkeyUserId;
+        }
+
+// after submit data pass key form
+        document.getElementById("passkeyForm").addEventListener("submit", async function (event) {
+            event.preventDefault(); // Prevent default form submission
+
+            let passkeyInput = document.getElementById("passkeyInput").value.trim();
+            let passkeyUserId = document.getElementById("passkeyUserId").value.trim();
+            // console.log(passkeyInput, passkeyUserId);
+
+            let errorMsg = document.getElementById("errorMsg");
+
+            if (!passkeyInput) {
+                errorMsg.textContent = "Passkey cannot be empty!";
+                errorMsg.style.display = "block";
+                return;
+            }
+
+            try {
+                const mainServerApi = "{{ main_server_api }}"; // Injected from Django
+
+                // API URL (Replace with your actual API endpoint)
+                const response = await fetch(`${mainServerApi}/api/connect_passkeys/?passkey=${encodeURIComponent(passkeyInput)}`, {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" }
+                });
+                console.log(passkeyInput);
+                let data = await response.json();
+                // console.log(data);
+
+                if (response.ok) {
+                    alert(`✅ Success: ${data.success}`);
+                    errorMsg.style.display = "none";
+                    document.getElementById("passkeyModal").querySelector(".btn-close").click(); // Close modal
+                       
+                    // Wait for the modal close animation, then open OTP Modal
+                    setTimeout(() => {
+                        let otpModal = new bootstrap.Modal(document.getElementById("otpModal"));
+                         document.getElementById("storePasskeyUserId").value = passkeyUserId;
+                        document.getElementById("storedPasskey").value = passkeyInput;
+                        otpModal.show();
+                    }, 500); // Delay to ensure the first modal is fully closed
+                } else {
+                    errorMsg.textContent = "Invalid Passkey!";
+                    errorMsg.style.display = "block";
+                }
+            } catch (error) {
+                // console.error("Error:", error);
+                errorMsg.textContent = "Something went wrong!";
+                errorMsg.style.display = "block";
+            }
+        });
+
+
+
+         // Handle OTP Form Submission
+    document.getElementById("otpForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+    
+        const otpInput = document.getElementById("otpInput").value;
+        const connectionId = document.getElementById("storePasskeyUserId").value; 
+        const passkey = document.getElementById("storedPasskey").value; // Retrieve stored passkey
+    
+        console.log(otpInput,connectionId,passkey);
+        if (!otpInput) {
+            alert("OTP is required!");
+            return;
+        }
+
+
+        const mainServerApi = "{{ main_server_api }}"; // Injected from Django
+
+    
+        try {
+            const otpResponse = await fetch(`${mainServerApi}/api/connect_passkeys/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ passkey:passkey, unique_phone: connectionId, otp: otpInput })
+            });
+    
+            const otpData = await otpResponse.json();
+    
+            if (otpResponse.ok) {
+                alert(`✅ OTP Verified: ${otpData.success}`);
+                
+                // ✅ Save Passkey and Connection ID Database
+                submitPasskeyAndConnection(passkey, connectionId);
+    
+                $("#otpModal").modal("hide");
+            } else {
+                alert(`❌ OTP Verification Failed: ${otpData.error}`);
+            }
+        } catch (error) {
+            // console.error("Error:", error);
+            alert("Server error, try again later!");
+        }
+    });
+
+
+    // Send Passkey & Connection ID to Django
+    async function submitPasskeyAndConnection(passkey, connectionId) {
+        try {
+            const csrfToken = getCSRFToken(); // Get CSRF token
+    
+            const response = await fetch(`/api/passkey`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": csrfToken,  
+                },
+                body: `pass_key=${encodeURIComponent(passkey)}&id=${encodeURIComponent(connectionId)}`
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+                alert(`✅ Passkey and Connection ID saved successfully!`);
+                window.location.href = "/dashboard"; // Redirect if needed
+            } else {
+                alert(`❌ Failed to save data: ${data.error}`);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Server error, try again later!");
+        }
+    }
+    
+    // CSRF Token Helper
+    function getCSRFToken() {
+        return document.cookie.split('; ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+    }
+
+    </script>
+
+   
+    <!-- DATA Table js.................................... -->
+    <!-- jQuery (Required for DataTables) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap JS (Optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- DataTables Buttons Extension -->
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+
+    <!-- Buttons for Excel, CSV, PDF, Print -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
+    <!-- ✅ Column Visibility Button -->
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.colVis.min.js"></script>
+
+
+    <script>
+        $(document).ready(function () {
+            $('#userTable').DataTable({
+                "paging": true, // Enables pagination
+                "searching": true, // Enables search bar
+                "ordering": true, // Enables column sorting
+                "info": true, // Shows table info (e.g., "Showing 1 to 10 of 50 entries")
+                "lengthChange": true, // ✅ Enables the dropdown to select number of rows per page
+                "lengthMenu": [5, 10, 25, 50, 100], // ✅ Defines options in the dropdown
+            dom: '<"top d-flex justify-content-between"l f><"button-container text-start mt-2" B>rtip',  
+                buttons: [
+                    { extend: 'csv', className: 'btn btn-csv', text: '<i class="fas fa-file-csv"></i> CSV' },
+                    { extend: 'excel', className: 'btn btn-excel', text: '<i class="fas fa-file-excel"></i> Excel' },
+                    { extend: 'pdf', className: 'btn btn-pdf', text: '<i class="fas fa-file-pdf"></i> PDF' },
+                    { extend: 'print', className: 'btn btn-print', text: '<i class="fas fa-print"></i> Print' },
+                    { extend: 'colvis', className: 'btn btn-secondary', text: '<i class="fas fa-columns"></i> Column Visibility' }
+                ]
+            });
+        });
+
+
+    </script>
+    <!-- DATA Table js End.................................... -->
+
+    <script>
+        $(document).ready(function () {
+            // Show passkey modal when button is clicked
+            $(".add-passkey-btn").click(function () {
+                let userId = $(this).data("userid");
+                $("#userId").val(userId);
+                $("#passkeyInput").val("");
+                $("#errorMsg").hide();
+                $("#passkeyModal").modal("show");
+            });
+
+            // Allow paste via the paste button using Clipboard API
+            $("#pasteButton").click(function () {
+                // Use the Clipboard API if available
+                if (navigator.clipboard) {
+                    navigator.clipboard.readText()
+                        .then(function (text) {
+                            $("#passkeyInput").val(text);
+                        })
+                        .catch(function (err) {
+                            console.error("Failed to read clipboard contents: ", err);
+                        });
+                } else {
+                    // Fallback if Clipboard API is not available
+                    alert("Clipboard API not supported.");
+                }
+            });
+
+            // Clear the input when clear button is clicked
+            $("#clearButton").click(function () {
+                $("#passkeyInput").val("");
+            });
+
+            // Prevent manual input (if required)
+            $("#passkeyInput").on("keydown", function (e) {
+                // Allow ctrl+v or command+v for paste via keyboard
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
+                    return;
+                }
+                e.preventDefault();
+            });
+
+            // Also handle paste event manually
+            $("#passkeyInput").on("paste", function (e) {
+                e.preventDefault();
+                var clipboardData = e.originalEvent.clipboardData || window.clipboardData;
+                var pastedText = clipboardData.getData("text");
+                $(this).val(pastedText);
+            });
+
+           
+        });
+
+    </script>
+
+</div>
+
+
+{% endblock %}

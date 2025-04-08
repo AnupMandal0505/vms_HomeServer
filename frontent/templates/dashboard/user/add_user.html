@@ -1,0 +1,88 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Dashboard | Add user{% endblock %}
+
+{% block content %}
+<div class="bg-light d-flex align-items-center justify-content-center mt-5 pt-5 pb-5">
+
+    <div class="card shadow p-4 w-100" style="max-width: 500px;">
+        <h2 class="text-center mb-4">Register</h2>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Hidden UUID -->
+            <input type="hidden" id="id" name="id">
+
+            <!-- Full Name Row -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">First Name</label>
+                    <input type="text" name="first_name" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" name="last_name" class="form-control" required>
+                </div>
+            </div>
+
+            <!-- Email & Phone Row -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" name="phone" class="form-control" required>
+                </div>
+            </div>
+
+            <!-- Password & Role Row -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Role</label>
+
+                    <select name="role" class="form-select" disabled required>
+                        {% if roles == "GM" %}
+                            <option value="gm" selected>General Manager</option>
+                        {% elif  roles == "SECRETARY"  %}
+                        <option value="secretary" selected>Secretary</option>
+
+                        {% else %}
+                        <option value="pa" selected>Personal Assistant</option>
+
+                        {% endif %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- GM Selection Row -->
+             {% if roles == "PA" or roles == "SECRETARY"  %}
+                <div class="mb-3">
+                <label class="form-label">Assign General Manager</label>
+                <select id="user_select" name="gm" class="form-select" required>
+                    {% for user in gm_list %}
+                        <option value="{{ user.id }}">
+                            {{ user.first_name }} {{ user.last_name }} -
+                            {% for role in user.roles.all %}
+                                {{ role }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100">Register</button>
+        </form>
+    </div>
+
+
+</div>
+
+{% endblock %}
