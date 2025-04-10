@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework import status
-from authuser.models import Appointment,AdditionalVisitor
+from authuser.models import Appointment,AdditionalVisitor,RegularVisitor
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication,SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -27,6 +27,7 @@ class AppointmentCreateView(BaseAuthentication):
     parser_classes = [MultiPartParser, FormParser]
 
     def create(self, request, *args, **kwargs):
+        print(request.data)
         
         try:
             data = request.data.copy()
@@ -72,14 +73,16 @@ class AppointmentCreateView(BaseAuthentication):
                 if additional_visitors_list:
                     AdditionalVisitor.objects.bulk_create(additional_visitors_list)
 
-                print(" Appointment & Visitors Saved Successfully!",additional_visitors_list)
+                #  Serialize only names
+            additional_visitors_name = [visitor.name for visitor in additional_visitors_list]
+
 
             tasks.create_appointment_mail.delay(
                 appointment_data.visitor_name,
                 appointment_data.email,
                 appointment_data.date,
                 f"{request.user.gm.first_name} {request.user.gm.last_name}",
-                additional_visitors_list,
+                additional_visitors_name,
                 "Appointment Confirmation",
                 "message"
             )
@@ -96,3 +99,18 @@ class AppointmentCreateView(BaseAuthentication):
 
 
 
+class RegularVisitorCreate(BaseAuthentication):
+    def create(self, request):
+        try:
+            visitor = RegularVisitor.objects.create(
+                name=request.data.get('name'),
+                v_type=request.data.get('v_type', 'regular visitor'),
+                phone=request.data.get('phone'),
+                email=request.data.get('email'),
+                company_name=request.data.get('company_name', 'Na'),
+                company_address=request.data.get('company_address', 'NA'),
+                created_by=request.user            )
+            return Response({"RES": True}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            print(e)
+            return Response({"ERR": False}, status=status.HTTP_400_BAD_REQUEST)

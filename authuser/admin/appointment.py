@@ -1,6 +1,6 @@
 # admin.py
 from django.contrib import admin
-from authuser.models import Appointment,AdditionalVisitor
+from authuser.models import Appointment,AdditionalVisitor,RegularVisitor
 from django.utils.translation import gettext_lazy as _  # For translatable fieldset titles
 
 
@@ -41,3 +41,31 @@ class AppointmentAdmin(admin.ModelAdmin):
 
     readonly_fields = ('created_at', 'updated_at')  # Make timestamps read-only
 
+
+
+
+
+
+
+@admin.register(RegularVisitor)
+class RegularVisitorAdmin(admin.ModelAdmin):
+    list_display = ('name', 'phone', 'email', 'v_type', 'created_by', 'created_at')
+    search_fields = ('name', 'phone', 'email', 'company_name')
+    list_filter = ('v_type', 'created_at')
+
+    fieldsets = (
+        ("Visitor Info", {
+            'fields': ('name', 'v_type', 'phone', 'email')
+        }),
+        ("Company Info", {
+            'fields': ('company_name', 'company_address')
+        }),
+        ("Image Upload", {
+            'fields': ('image',)
+        }),
+        ("Modification Meta", {
+            'classes': ('collapse',),  # Optional: collapses this section
+            'fields': ('created_by', 'created_at', 'updated_by', 'updated_at'),
+        }),
+    )
+    readonly_fields = ('created_at', 'updated_at')

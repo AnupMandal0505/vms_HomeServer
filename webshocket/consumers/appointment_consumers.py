@@ -12,7 +12,7 @@ class IndexPageConsumer(AsyncWebsocketConsumer):
         """Connect WebSocket and add to group."""
         await self.accept()
         await self.channel_layer.group_add('index_page', self.channel_name)
-        print(f"✅ WebSocket {self.channel_name} added to group: index_page")
+        # print(f" WebSocket {self.channel_name} added to group: index_page")
 
         # Initialize filters
         self.filter_date = date.today().strftime('%Y-%m-%d')
@@ -49,7 +49,7 @@ class IndexPageConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         """Disconnect WebSocket and remove from group."""
-        print(f"❌ WebSocket {self.channel_name} disconnected with code: {close_code}")
+        # print(f" WebSocket {self.channel_name} disconnected with code: {close_code}")
         await self.channel_layer.group_discard('index_page', self.channel_name)
 
         # Cancel the ping task to stop sending heartbeat messages
@@ -65,7 +65,6 @@ class IndexPageConsumer(AsyncWebsocketConsumer):
             (updated_data.get("created_by") == str(self.user.id))
         )
 
-        print("update",is_relevant)
         # Send JSON response only if relevant
         # if is_relevant:
         await self.send(text_data=json.dumps({

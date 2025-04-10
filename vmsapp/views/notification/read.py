@@ -15,7 +15,6 @@ class BaseAuthentication(viewsets.ViewSet):
 class ContactList(BaseAuthentication):
     def list(self, request):
         try:
-            # print(request.GET.get("gm_id"))
             data=User.objects.filter(gm=request.GET.get("gm_id"))
             serial=ContactListSerializer(data,many=True)
             return Response({'RES':serial.data}, status=status.HTTP_200_OK)

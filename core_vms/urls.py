@@ -28,10 +28,11 @@ urlpatterns = [
     path('api/', include('authuser.urls')),
     path('api/', include('vmsapp.urls')),
     # path('realtime', include('demo.urls')),
-    path('api/', include('webshocket.urls')),
+    # path('api/', include('webshocket.urls')),
     path('', include('frontent.urls',namespace="frontent")),
 ]
 
 # Serve media files in development mode
 if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

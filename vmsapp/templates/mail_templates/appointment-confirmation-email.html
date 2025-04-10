@@ -99,8 +99,8 @@
                     <span class="label">Additional Visitors:</span>
                     {% if additional_visitors %}
                     <ul class="visitors-list">
-                        {% for visitor in additional_visitors %}
-                            <li>{{ visitor.name }}</li>
+                        {% for name in additional_visitors %}
+                            <li>{{ name }}</li>
                         {% endfor %}
                     </ul>
                 {% else %}

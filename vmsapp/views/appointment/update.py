@@ -40,7 +40,6 @@ class CallVisitorView(BaseAuthentication):
     def list(self, request):
         visitor_id = request.query_params.get('visitor_id')  # Extract from query
         action = request.query_params.get('action')  # Extract action
-        # print(visitor_id,action)
         if not visitor_id or not action:
             return Response({'error': 'visitor_id and call field are required'}, status=status.HTTP_400_BAD_REQUEST)
         try:

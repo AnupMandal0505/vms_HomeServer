@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-3n#vak_0s$ctt(9t28@1id(30z*3zv&(_v@5y3(%zkld+#4#(6
 DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = [os.getenv('ALLOWED_HOSTS', '').replace('https://', '')]
-API_BASE_URL = f"http://{ALLOWED_HOSTS}/api/"
+API_BASE_URL = os.getenv("API_BASE_URL")
 
 MAIN_SERVER_DOMAIN = os.getenv("MAIN_SERVER_DOMAIN")
 
@@ -182,10 +182,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR/'static'
-MEDIA_URL='media/'
-MEDIA_ROOT=BASE_DIR/'media'
+# STATIC_URL = 'static/'
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

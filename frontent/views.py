@@ -137,14 +137,7 @@ class UpdateUser(View):
             user_id = request.POST.get("user_id")
             first_name = request.POST.get("first_name")
             last_name = request.POST.get("last_name")
-          
-            # try:
-            #     print(user_id)
-            #     user_uuid = uuid.UUID(user_id)
-            # except (ValueError, AttributeError, TypeError):
-            #     messages.error(request, "Invalid user ID format.")
-            #     return redirect("frontent:dashboard_urls")
-
+        
             user = get_object_or_404(User, id=user_id)
             user.first_name = first_name
             user.last_name = last_name

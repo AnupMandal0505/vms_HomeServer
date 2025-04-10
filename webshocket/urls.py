@@ -9,9 +9,9 @@ from vmsapp.views.notification.update import AcceptCall
 # from vmsapp.views.notification.update import AcceptCall
 
 api_router = SimpleRouter()
-api_router.register('call', CreateNotification, basename='call')
-api_router.register('contact_list', ContactList, basename='contact_list')
-api_router.register('accept_call', AcceptCall, basename='accept_call')
+# api_router.register('call', CreateNotification, basename='call')
+# api_router.register('contact_list', ContactList, basename='contact_list')
+# api_router.register('accept_call', AcceptCall, basename='accept_call')
 # api_router.register('snacks', SnacksViewSet, basename='snacks')
 # api_router.register('order', OrderCreateAPIView, basename='order')
 # api_router.register('order_history', OrderHistoryAPIView, basename='order_history')

@@ -3,9 +3,9 @@ from authuser.models import User
 from uuid import uuid4
 
 class Modification(models.Model):
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="created_appointments",limit_choices_to={'groups__name': 'PA'})
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="%(class)s_created_by",limit_choices_to={'groups__name__in': ['PA', 'SECRETARY']})
     created_at = models.DateTimeField(auto_now_add=True) 
-    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="updated_appointments")  # User who last updated the appointment
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="%(class)s_updated_by")  # User who last updated the appointment
     updated_at = models.DateTimeField(auto_now=True)  
     
     class Meta:
@@ -68,3 +68,34 @@ class AdditionalVisitor(models.Model):
             
     def __str__(self):
         return self.name
+    
+
+
+
+
+class RegularVisitor(Modification):
+    name = models.CharField(max_length=100)
+    v_type = models.CharField(max_length=100, default="regular visitor",blank=True,null=True)
+    phone = models.CharField(max_length=15,unique=True)
+    email = models.EmailField(blank=True,null=True)
+    company_name = models.CharField(max_length=100,blank=True,null=True)
+    company_address = models.CharField(max_length=255,blank=True,null=True)
+    image = models.FileField(upload_to='regular_visitor/%Y/%m/%d/',blank=True,null=True) 
+
+    def save(self, *args, **kwargs):
+        if self.name:
+            self.name = self.name.upper()
+        if self.v_type:
+            self.v_type = self.v_type.upper()
+        if self.company_name:
+            self.company_name = self.company_name.upper()
+        if self.company_address:
+            self.company_address = self.company_address.upper()
+        super().save(*args, **kwargs)
+
+    class Meta:
+        db_table = "regular_visitor_table"
+
+    def __str__(self):
+        return f"{self.name} ({self.phone})"
+    

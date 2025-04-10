@@ -13,7 +13,6 @@ class BaseAuthentication(viewsets.ViewSet):
 
 class OrderCreateAPIView(BaseAuthentication):
     def create(self, request):
-        print(request.data)
         with transaction.atomic():
             try:
                 order = Order.objects.create(created_by=request.user)
