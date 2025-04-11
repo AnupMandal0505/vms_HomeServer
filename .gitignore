@@ -30,3 +30,6 @@ media/
 # Environments
 venv/
 .env/
+
+
+core_vms/dev_settings.py

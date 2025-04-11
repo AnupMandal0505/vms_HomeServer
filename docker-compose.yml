@@ -71,18 +71,18 @@ services:
     depends_on:
       - msgbroker
       - web
-  # nginx:
-  #   image: nginx:latest
-  #   container_name: nginx_proxy
-  #   restart: always
-  #   ports:
-  #     - "80:80"
-  #   volumes:
-  #     - "./nginx/nginx.conf:/etc/nginx/nginx.conf"
-  #     - static_vms:/vms/staticfiles
-  #     - media_vms:/vms/media
-  #   depends_on:
-  #     - web
+  nginx:
+    image: nginx:latest
+    container_name: nginx_proxy
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - "./nginx/nginx.conf:/etc/nginx/nginx.conf"
+      - static_vms:/vms/staticfiles
+      - media_vms:/vms/media
+    depends_on:
+      - web
 
 
 volumes:

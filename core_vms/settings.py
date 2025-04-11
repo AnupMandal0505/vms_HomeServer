@@ -30,7 +30,13 @@ SECRET_KEY = 'django-insecure-3n#vak_0s$ctt(9t28@1id(30z*3zv&(_v@5y3(%zkld+#4#(6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = [os.getenv('ALLOWED_HOSTS', '').replace('https://', '')]
+# ALLOWED_HOSTS = [os.getenv('ALLOWED_HOSTS', '').replace('https://', '')]
+
+ALLOWED_HOSTS = [
+    host.strip().replace('http://', '').replace('https://', '')
+    for host in os.getenv('ALLOWED_HOSTS', '').split(',')
+    if host.strip()
+]
 API_BASE_URL = os.getenv("API_BASE_URL")
 
 MAIN_SERVER_DOMAIN = os.getenv("MAIN_SERVER_DOMAIN")
