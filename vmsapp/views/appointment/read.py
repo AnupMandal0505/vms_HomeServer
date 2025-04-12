@@ -6,6 +6,8 @@ from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication,SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.exceptions import NotFound
+from django.core.paginator import EmptyPage
 
 
 
@@ -17,15 +19,39 @@ class BaseAuthentication(viewsets.ViewSet):
 
 
 
+
 class CustomPagination(PageNumberPagination):
     page_size = None
     page_size_query_param = 'page_size'
     max_page_size = 100
 
+    def paginate_queryset(self, queryset, request, view=None):
+        self.page_size = self.get_page_size(request)
+        paginator = self.django_paginator_class(queryset, self.page_size)
+
+        page_number = request.query_params.get(self.page_query_param, 1)
+
+        #  Invalid page numbers (like 0, -1, a, etc)
+        try:
+            if int(page_number) < 1:
+                raise NotFound({"detail": "Page number must be 1 or greater."})
+        except ValueError:
+            raise NotFound({"detail": "Invalid page number format."})
+
+        #  Catch out-of-range page numbers
+        try:
+            self.page = paginator.page(page_number)
+        except EmptyPage:
+            raise NotFound({"detail": "Invalid page number. Out of range."})
+
+        self.request = request
+        return list(self.page)
+
     def get_paginated_response(self, data):
-        # Add page number explicitly in next/previous URLs
+        total_pages = self.page.paginator.num_pages  #  Add total_pages in response
         return Response({
             'count': self.page.paginator.count,
+            'total_pages': total_pages,
             'next': self._add_page_param(self.get_next_link()),
             'previous': self._add_page_param(self.get_previous_link()),
             'results': data
@@ -35,6 +61,8 @@ class CustomPagination(PageNumberPagination):
         if url and 'page=' not in url:
             return f"{url}&page=1"
         return url
+
+
 
 # http://127.0.0.1:8000/api/appointments/get-appointments/?status=PENDING&client=j
 
@@ -98,15 +126,22 @@ class AppointmentListView(BaseAuthentication):
         return Response(serializer.data)
 
 
+
+
+
 class GetRegularVisitor(BaseAuthentication):
     def list(self, request):
-        # phone = request.query_params.get('phone')
+        phone = request.query_params.get('phone')
         # if not phone:
         #     return Response({"error": "Phone number is required"}, status=400)
 
         try:
-            visitor = RegularVisitor.objects.all()
-            return Response({"RES":True,"data":RegularVisitorSerializer(visitor, many=True).data})
+            if phone:
+                visitors = RegularVisitor.objects.filter(phone=phone)
+            else:
+                # If phone not provided, filter all Inoffice visitors
+                visitors = RegularVisitor.objects.filter(v_type="IN OFFICE")
+            return Response({"RES":True,"data":RegularVisitorSerializer(visitors, many=True).data})
         except RegularVisitor.DoesNotExist:
             return Response({"ERR": "Visitor not found"}, status=404)
 

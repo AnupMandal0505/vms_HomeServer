@@ -51,9 +51,9 @@ services:
       - static_vms:/vms/staticfiles
       - media_vms:/vms/media
     # expose:
-    #   - "8000"
+    #   - "4002"
     ports:
-      - "8000:8000"
+      - "4002:4002"
 
 
   msgbroker:

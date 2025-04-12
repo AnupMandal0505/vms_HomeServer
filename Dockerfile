@@ -22,10 +22,10 @@ RUN python manage.py collectstatic --noinput
 
 
 # Expose port for WebSocket
-EXPOSE 8000
+EXPOSE 4002
 
 # # Run Gunicorn (WSGI Server)
-# CMD ["gunicorn", "--bind", "0.0.0.0:8000", "AppointmentServer.wsgi:application"]
+# CMD ["gunicorn", "--bind", "0.0.0.0:4002", "AppointmentServer.wsgi:application"]
 
 # # Run Daphne (ASGI Server)
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "core_vms.asgi:application"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "4002", "core_vms.asgi:application"]
