@@ -75,7 +75,7 @@ class AdditionalVisitor(models.Model):
 
 class RegularVisitor(Modification):
     name = models.CharField(max_length=100)
-    v_type = models.CharField(max_length=100, default="regular visitor",blank=True,null=True)
+    v_type = models.CharField(max_length=100, default="outside",blank=True,null=True)
     phone = models.CharField(max_length=15,unique=True)
     email = models.EmailField(blank=True,null=True)
     company_name = models.CharField(max_length=100,blank=True,null=True)

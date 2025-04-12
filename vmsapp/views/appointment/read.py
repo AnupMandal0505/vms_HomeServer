@@ -117,7 +117,6 @@ class AppointmentListView(BaseAuthentication):
         if page_size:
             paginated_queryset = paginator.paginate_queryset(queryset, request)
             serializer = self.get_serializer(paginated_queryset, many=True)
-            print(serializer.data)
             return paginator.get_paginated_response(serializer.data)
 
         # Default fallback: return all (or you can raise error if preferred)
@@ -140,7 +139,7 @@ class GetRegularVisitor(BaseAuthentication):
                 visitors = RegularVisitor.objects.filter(phone=phone)
             else:
                 # If phone not provided, filter all Inoffice visitors
-                visitors = RegularVisitor.objects.filter(v_type="IN OFFICE")
+                visitors = RegularVisitor.objects.filter(v_type="IN-OFFICE")
             return Response({"RES":True,"data":RegularVisitorSerializer(visitors, many=True).data})
         except RegularVisitor.DoesNotExist:
             return Response({"ERR": "Visitor not found"}, status=404)

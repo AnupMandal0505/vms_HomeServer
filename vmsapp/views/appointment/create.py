@@ -101,16 +101,23 @@ class AppointmentCreateView(BaseAuthentication):
 
 class RegularVisitorCreate(BaseAuthentication):
     def create(self, request):
+        print(request.POST)
         try:
-            visitor = RegularVisitor.objects.create(
-                name=request.data.get('name'),
-                v_type=request.data.get('v_type', 'regular visitor'),
-                phone=request.data.get('phone'),
-                email=request.data.get('email'),
-                company_name=request.data.get('company_name', 'Na'),
-                company_address=request.data.get('company_address', 'NA'),
+            data = request.data.copy()
+            files = request.FILES
+            if RegularVisitor.objects.filter(phone=data.get('phone')).exists():
+                return Response({"ERR": False, "msg": "Already Registered Phone"}, status=status.HTTP_200_OK)
+            
+            RegularVisitor.objects.create(
+                name=data.get('name'),
+                v_type=data.get('v_type', 'outside'),
+                phone=data.get('phone'),
+                email=data.get('email'),
+                company_name=data.get('company_name', 'Na'),
+                company_address=data.get('company_address', 'NA'),
+                image=files.get("visitor_img"),
                 created_by=request.user            )
             return Response({"RES": True}, status=status.HTTP_201_CREATED)
         except Exception as e:
             print(e)
-            return Response({"ERR": False}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": False}, status=status.HTTP_400_BAD_REQUEST)
