@@ -59,7 +59,10 @@ def index(request):
     # Return a HTTP response
     return HttpResponse("Hello, world! You're at the index page.")
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
+@method_decorator(csrf_exempt, name='dispatch')
 class DisplayLoginAPI(viewsets.ViewSet):
     def create(self, request):
         # print(request.data)

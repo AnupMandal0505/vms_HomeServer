@@ -25,12 +25,32 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    orderitems = OrderItemSerializer(many=True, source="SnacksItem")
+    orderitems = OrderItemSerializer(many=True, source="order_items")
+    created_by_name = serializers.SerializerMethodField()
+    created_by_phone = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
-        fields = ["id", "orderitems", "status", "created_by", "updated_by", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "orderitems",
+            "status",
+            "created_by",         # still shows user ID
+            "created_by_name",
+            "created_by_phone",    
+            "updated_by",
+            "created_at",
+            "updated_at"
+        ]
         read_only_fields = ["id", "created_by", "updated_by", "created_at", "updated_at"]
+
+    def get_created_by_name(self, obj):
+        if obj.created_by:
+            return f"{obj.created_by.first_name} {obj.created_by.last_name}".strip()
+        return None
+
+    def get_created_by_phone(self, obj):
+        return obj.created_by.phone if obj.created_by else None
 
 
 
