@@ -15,7 +15,7 @@ class AppointmentAdmin(admin.ModelAdmin):
     inlines = [AdditionalVisitorInline]
     
     # Fields to display in list view
-    list_display = ('date', 'created_at','visitor_name', 'status', 'company_name')
+    list_display = ('date', 'created_at','visitor_name','v_type', 'status', 'company_name')
     list_filter = ('status', 'date', 'company_name')  # Filters on the right
     search_fields = ('visitor_name', 'company_name', 'email', 'phone')  # Search box
 
@@ -25,7 +25,7 @@ class AppointmentAdmin(admin.ModelAdmin):
             'fields': ('visitor_name', 'email', 'phone', 'visitor_img')
         }),
         ('Appointment Details', {
-            'fields': ('date', 'description', 'status', 'purpose_of_visit')
+            'fields': ('date', 'description','v_type', 'status', 'purpose_of_visit')
         }),
         ('Company Details', {
             'fields': ('company_name', 'company_address')

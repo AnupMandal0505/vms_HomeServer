@@ -33,6 +33,7 @@ class Appointment(Modification):
     company_address = models.CharField(max_length=100,default="NA")
     purpose_of_visit = models.CharField(max_length=100,default="Na")
     visitor_img = models.FileField(upload_to='visitor_img/%Y/%m/%d/',blank=True) 
+    v_type = models.CharField(max_length=100, default="OUTSIDE",blank=True,null=True)
 
 
     def save(self, *args, **kwargs):
@@ -45,7 +46,8 @@ class Appointment(Modification):
             self.company_address = self.company_address.upper()
         if self.purpose_of_visit:
             self.purpose_of_visit = self.purpose_of_visit.upper()
-
+        if self.v_type:
+            self.v_type = self.v_type.upper()
         super().save(*args, **kwargs)
     class Meta:
         db_table = "appointment_table"

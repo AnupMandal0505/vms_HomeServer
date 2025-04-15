@@ -55,6 +55,7 @@ class AppointmentCreateView(BaseAuthentication):
                     company_address=data.get("company_address"),
                     purpose_of_visit=data.get("purpose_of_visit"),
                     visitor_img=files.get("visitor_img"),
+                    v_type=data.get("visitor_type"),
                     created_by=request.user
                 )
 
