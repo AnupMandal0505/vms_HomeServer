@@ -102,7 +102,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [os.getenv("REDIS_URL", "redis://anurag_redis:6379/0")],
+            "hosts": [os.getenv("REDIS_URL", "redis://@metro_redish:6379/0")],
         },
     },
 }

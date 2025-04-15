@@ -13,15 +13,33 @@ class BaseAuthentication(viewsets.ViewSet):
 
 
 
-class OrderUpdate(BaseAuthentication):
+# class OrderUpdate(BaseAuthentication):
+#     def list(self, request):
+#         try:
+#             order_up=Order.objects.filter(id=request.GET.get("id"))
+#             order_up.updated_by=request.user
+#             order_up.status=True
+#             order_up.save()
+#             return Response({"RES":True},status=status.HTTP_200_OK)
+#         except Exception as e:
+
+#             return Response({"ERR":False},status=status.HTTP_400_BAD_REQUEST)
+
+class OrderUpdate(viewsets.ViewSet):
     def list(self, request):
         try:
-            order_up=Order.objects.filter(id=request.GET.get("id"))
-            order_up.updated_by=request.user
-            order_up.status=True
-            order_up.save()
-            return Response({"RES":True},status=status.HTTP_200_OK)
+            order_id = request.GET.get("id")  # Use request.data for POST, PUT, PATCH
+            if not order_id:
+                return Response({"ERR": "Missing 'id' parameter"}, status=status.HTTP_400_BAD_REQUEST)
+
+            order = Order.objects.get(id=order_id)
+            order.status = True  # Update the status
+            order.save()
+
+            return Response({"RES": True}, status=status.HTTP_200_OK)
+
+        except Order.DoesNotExist:
+            return Response({"ERR": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+
         except Exception as e:
-
-            return Response({"ERR":False},status=status.HTTP_400_BAD_REQUEST)
-
+            return Response({"ERR": str(e)}, status=status.HTTP_400_BAD_REQUEST)

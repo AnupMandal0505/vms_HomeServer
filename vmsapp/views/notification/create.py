@@ -16,7 +16,7 @@ class BaseAuthentication(viewsets.ViewSet):
 class CreateNotification(BaseAuthentication):
     def create(self, request):
         try:
-            CallNotification.objects.create(receiver=request.user,sender=request.data.get("sender_id"))
+            CallNotification.objects.create(sender=request.user,receiver_id=request.data.get("receiver"))
             return Response({"RES": True })
         except Exception as e:
             return Response({"ERR": False })
