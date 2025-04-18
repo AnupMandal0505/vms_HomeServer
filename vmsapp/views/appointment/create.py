@@ -12,6 +12,10 @@ from django.db import transaction  #  Import this at top
 from vmsapp import tasks
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class BaseAuthentication(viewsets.ViewSet):
     # def list(self, request):
     #     # token = request.META.get('HTTP_AUTHORIZATION').split(' ')[1]
@@ -62,6 +66,7 @@ class AppointmentCreateView(BaseAuthentication):
                         created_by=request.user
                     )
                 else:
+                    logger.info(f"🟢 [INFO] Processing data: {request.user.secretary.id}")
 
                     #  Create Main Appointment By PA
                     appointment_data = Appointment.objects.create(
@@ -96,22 +101,25 @@ class AppointmentCreateView(BaseAuthentication):
                 #  Serialize only names
             additional_visitors_name = [visitor.name for visitor in additional_visitors_list]
 
+            if request.user.groups.filter(name="PA").exists():
 
-            tasks.create_appointment_mail.delay(
-                appointment_data.visitor_name,
-                appointment_data.email,
-                appointment_data.date,
-                f"{request.user.gm.first_name} {request.user.gm.last_name}",
-                additional_visitors_name,
-                "Appointment Confirmation",
-                "message"
-            )
+                tasks.create_appointment_mail.delay(
+                    appointment_data.visitor_name,
+                    appointment_data.email,
+                    appointment_data.date,
+                    f"{request.user.secretary.first_name} {request.user.secretary.last_name}",
+                    additional_visitors_name,
+                    "Appointment Confirmation",
+                    "message"
+                )
 
             #  Return success response if everything went fine
             return Response({"message": "Appointment and Additional Visitors created successfully."}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             print(" Error Occurred:", e)
+            logger.info(f"🟢 Error: {e}")
+
             return Response({"message": "Appointment Not created successfully."}, status=status.HTTP_400_BAD_REQUEST)
         
 

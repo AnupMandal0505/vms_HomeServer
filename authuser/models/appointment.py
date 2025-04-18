@@ -27,7 +27,7 @@ class Appointment(Modification):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="assigned_appointments",limit_choices_to={'groups__name': 'GM'}
+        related_name="assigned_appointments",limit_choices_to={'groups__name': 'SECRETARY'}
     ) 
 
     gm = models.ForeignKey(
