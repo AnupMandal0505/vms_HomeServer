@@ -25,7 +25,7 @@ class AppointmentConsumer(AsyncWebsocketConsumer):
     async def send_appointment_update(self, event):
         """Send updated appointment data to frontend"""
         data = event["data"]
-        if data.get("gm") == self.gm_user_id:  
+        if data.get("assigned_to") == self.gm_user_id:  
             # serialized_data = serialize_data(data)  # Convert non-serializable fields
             await self.send(text_data=json.dumps(data))
 
