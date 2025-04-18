@@ -116,6 +116,22 @@ class AppointmentCreateView(BaseAuthentication):
         
 
 
+class AppointmentForwardGmView(BaseAuthentication):
+
+    def create(self, request):
+        try:
+            appoint=Appointment.objects.get(id=request.data.get("id"))
+            appoint.gm=request.user.gm
+            appoint.save()
+        
+            #  Return success response if everything went fine
+            return Response({"message": "Appointment forward successfully."}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            print(" Error Occurred:", e)
+            return Response({"message": "Appointment forward fail successfully."}, status=status.HTTP_400_BAD_REQUEST)
+        
+
 
 
 

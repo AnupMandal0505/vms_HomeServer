@@ -1,11 +1,11 @@
 
 from django.urls import path,include
-from vmsapp.views import (AppointmentCreateView,AppointmentListView,AppointmentUpdateView,DeleteAppointmentView
-                          ,CreateNotification,ContactList,AcceptCall,CallVisitorView,RegularVisitorCreate,GetRegularVisitor)
+from vmsapp.views import (AppointmentCreateView,AppointmentForwardGmView,AppointmentListView,AppointmentUpdateView,DeleteAppointmentView,CallVisitorView,RegularVisitorCreate,GetRegularVisitor)
 from rest_framework.routers import SimpleRouter
 
 appointment = SimpleRouter()
 appointment.register('create-appointments', AppointmentCreateView, basename='create-appointments')
+appointment.register('forwards-appointments', AppointmentForwardGmView, basename='forwards-appointments')
 appointment.register('regular_visitor_create', RegularVisitorCreate, basename='regular_visitor_create')
 appointment.register('get-appointments', AppointmentListView, basename='get-appointments')
 appointment.register('get_regular_visitor', GetRegularVisitor, basename='get_regular_visitor')
