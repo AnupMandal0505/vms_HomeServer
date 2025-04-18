@@ -273,10 +273,13 @@
             <!-- <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button> -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+
+
+        <!-- working -->
+            <!-- <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <i class="fas fa-ellipsis-v"></i>
-            </button>
+            </button> -->
 
 
 
@@ -324,14 +327,14 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link" onclick="toggleSubmenu('productsSubmenu')">
-                    <i data-lucide="shopping-bag"></i>
+                    <i data-lucide="users"></i> <!-- Changed icon -->
                     General Manager
                     <i data-lucide="chevron-down" class="ms-auto"></i>
                 </a>
                 <ul class="submenu" id="productsSubmenu">
                     <li>
                         <a class="nav-link btn" href="{% url 'frontent:add_gm_user_urls' %}">
-                            <i data-lucide="plus"></i>
+                            <i data-lucide="plus-circle"></i> <!-- Changed icon -->
                             Add GM
                         </a>
                     </li>
@@ -346,37 +349,36 @@
 
             <li class="nav-item">
                 <a class="nav-link" onclick="toggleSubmenu('secretarySubmenu')">
-                    <i data-lucide="shopping-bag"></i>
+                    <i data-lucide="briefcase"></i> <!-- Changed icon -->
                     SECRETARY
                     <i data-lucide="chevron-down" class="ms-auto"></i>
                 </a>
                 <ul class="submenu" id="secretarySubmenu">
                     <li>
                         <a class="nav-link btn" href="{% url 'frontent:add_secretary_user_urls' %}">
-                            <i data-lucide="plus"></i>
-                            Add GM
+                            <i data-lucide="plus-circle"></i> <!-- Changed icon -->
+                            Add Secretary
                         </a>
                     </li>
                     <li>
                         <a class="nav-link" href="{% url 'frontent:user_secretary_list_urls' %}">
                             <i data-lucide="list"></i>
-                            List GM
+                            List Secretary
                         </a>
                     </li>
                 </ul>
             </li>
 
-
             <li class="nav-item">
                 <a class="nav-link btn" onclick="toggleSubmenu('ordersSubmenu')">
-                    <i data-lucide="shopping-cart"></i>
+                    <i data-lucide="clipboard"></i> <!-- Changed icon -->
                     Personal Assit.
                     <i data-lucide="chevron-down" class="ms-auto"></i>
                 </a>
                 <ul class="submenu" id="ordersSubmenu">
                     <li>
                         <a class="nav-link" href="{% url 'frontent:add_pa_user_urls' %}">
-                            <i data-lucide="plus"></i>
+                            <i data-lucide="plus-circle"></i> <!-- Changed icon -->
                             Add PA
                         </a>
                     </li>
@@ -386,21 +388,67 @@
                             List PA
                         </a>
                     </li>
-
                 </ul>
             </li>
+
+            <li class="nav-item">
+                <a class="nav-link btn" onclick="toggleSubmenu('displaySubmenu')">
+                    <i data-lucide="tv"></i> <!-- Changed icon -->
+                    Display
+                    <i data-lucide="chevron-down" class="ms-auto"></i>
+                </a>
+                <ul class="submenu" id="displaySubmenu">
+                    <li>
+                        <a class="nav-link" href="{% url 'frontent:add_display_user_urls' %}">
+                            <i data-lucide="plus-circle"></i> <!-- Changed icon -->
+                            Add User
+                        </a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="{% url 'frontent:user_display_list_urls' %}">
+                            <i data-lucide="list"></i>
+                            User List
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link btn" onclick="toggleSubmenu('canteenSubmenu')">
+                    <i data-lucide="utensils"></i> <!-- Changed icon -->
+                    Canteen
+                    <i data-lucide="chevron-down" class="ms-auto"></i>
+                </a>
+                <ul class="submenu" id="canteenSubmenu">
+                    <li>
+                        <a class="nav-link" href="{% url 'frontent:add_canteen_user_urls' %}">
+                            <i data-lucide="plus-circle"></i> <!-- Changed icon -->
+                            Add User
+                        </a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="{% url 'frontent:user_canteen_list_urls' %}">
+                            <i data-lucide="list"></i>
+                            User List
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
             <li class="nav-item">
                 <a class="nav-link" href="">
-                    <i data-lucide="bar-chart"></i>
+                    <i data-lucide="bar-chart-2"></i> <!-- Changed icon -->
                     Reports
                 </a>
             </li>
+
             <li class="nav-item">
                 <a class="nav-link" href="">
                     <i data-lucide="settings"></i>
                     Settings
                 </a>
             </li>
+
         </ul>
     </div>
 

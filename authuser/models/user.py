@@ -39,8 +39,17 @@ class User(AbstractUser):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='team_members',
+        related_name='gm_tag',
         limit_choices_to={"groups__name": "GM"}  # Limit to users in GM group
+    )
+
+    secretary = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='secretary_tag',
+        limit_choices_to={"groups__name": "SECRETARY"}  # Limit to users in GM group
     )
 
     USERNAME_FIELD = 'phone'  # Use phone as the unique identifier

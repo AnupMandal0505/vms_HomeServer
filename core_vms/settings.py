@@ -93,9 +93,7 @@ WSGI_APPLICATION = 'core_vms.wsgi.application'
 
 ASGI_APPLICATION = 'core_vms.asgi.application'
 
-
-
-
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 
 CHANNEL_LAYERS = {
@@ -217,3 +215,21 @@ EMAIL_PORT = os.getenv('EMAIL_PORT')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') == 'True'
+
+
+
+# settings.py
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+}

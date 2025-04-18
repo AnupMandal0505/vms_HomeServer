@@ -14,7 +14,7 @@ class CustomUserAdmin(UserAdmin):
         (("Group"), {"fields": ("groups","user_permissions")}),
         (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser')}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
-        (_('Team info'), {'fields': ('gm',)}),
+        (_('Team info'), {'fields': ('gm','secretary')}),
     )
     
     # List display settings

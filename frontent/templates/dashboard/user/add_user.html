@@ -29,13 +29,15 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label">Email Address</label>
-                    <input type="email" name="email" class="form-control" required>
+                    <input type="email" name="email" class="form-control" required title="Please enter a valid email">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Phone Number</label>
-                    <input type="text" name="phone" class="form-control" required>
+                    <input type="tel" name="phone" class="form-control" pattern="[6-9]{1}[0-9]{9}" maxlength="10"
+                        required title="Please enter a valid 10-digit phone number starting with 6-9">
                 </div>
             </div>
+
 
             <!-- Password & Role Row -->
             <div class="row mb-3">
@@ -48,30 +50,35 @@
 
                     <select name="role" class="form-select" disabled required>
                         {% if roles == "GM" %}
-                            <option value="gm" selected>General Manager</option>
-                        {% elif  roles == "SECRETARY"  %}
+                        <option value="gm" selected>General Manager</option>
+                        {% elif roles == "SECRETARY" %}
                         <option value="secretary" selected>Secretary</option>
 
-                        {% else %}
+                        {% elif roles == "PA" %}
                         <option value="pa" selected>Personal Assistant</option>
 
+                        {% elif roles == "DISPLAY" %}
+                        <option value="display" selected>Display</option>
+
+                        {% else%}
+                        <option value="canteen" selected>Canteen</option>
                         {% endif %}
                     </select>
                 </div>
             </div>
 
             <!-- GM Selection Row -->
-             {% if roles == "PA" or roles == "SECRETARY"  %}
-                <div class="mb-3">
+            {% if roles == "PA" or roles == "SECRETARY" or roles == "DISPLAY" %}
+            <div class="mb-3">
                 <label class="form-label">Assign General Manager</label>
                 <select id="user_select" name="gm" class="form-select" required>
                     {% for user in gm_list %}
-                        <option value="{{ user.id }}">
-                            {{ user.first_name }} {{ user.last_name }} -
-                            {% for role in user.roles.all %}
-                                {{ role }}{% if not forloop.last %}, {% endif %}
-                            {% endfor %}
-                        </option>
+                    <option value="{{ user.id }}">
+                        {{ user.first_name }} {{ user.last_name }} -
+                        {% for role in user.roles.all %}
+                        {{ role }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </option>
                     {% endfor %}
                 </select>
             </div>

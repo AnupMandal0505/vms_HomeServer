@@ -3,7 +3,7 @@ app_name="frontent"
 from django.contrib import admin
 from django.urls import path
 
-from frontent.views import index,AuthView,LogoutView,Dashboard,GmAddUser,PaAddUser,GmList,PaList,UpdateUser,Passkey,SECRETARYAddUser,SECRETARYList
+from frontent.views import index,AuthView,LogoutView,Dashboard,GmAddUser,PaAddUser,GmList,PaList,UpdateUser,Passkey,SECRETARYAddUser,SECRETARYList,CanteenAddUser,DisplayAddUser,DisplayList,CanteenList
 # from demo.views import index1
 
 urlpatterns = [
@@ -23,10 +23,21 @@ urlpatterns = [
     # Secretary.......................................
     path('add_secretary_user',SECRETARYAddUser.as_view(), name='add_secretary_user_urls'),
     path('user_secretary_list',SECRETARYList.as_view(), name='user_secretary_list_urls'),
-    path('update_secretary_user',UpdateUser.as_view(), name='update_user_urls'),
+    # path('update_secretary_user',UpdateUser.as_view(), name='update_user_urls'),
 
     # Personal Assistent.......................................
     path('add_pa_user',PaAddUser.as_view(), name='add_pa_user_urls'),
     path('user_pa_list',PaList.as_view(), name='user_pa_list_urls'),
-    path('update_pa_user',UpdateUser.as_view(), name='update_pa_user_urls'),
+    # path('update_pa_user',UpdateUser.as_view(), name='update_pa_user_urls'),
+
+# Display.......................................
+    path('add_display_user',DisplayAddUser.as_view(), name='add_display_user_urls'),
+    path('user_display_list',DisplayList.as_view(), name='user_display_list_urls'),
+    # path('update_display_user',UpdateUser.as_view(), name='update_user_urls'),
+
+    # Canteen.......................................
+    path('add_canteen_user',CanteenAddUser.as_view(), name='add_canteen_user_urls'),
+    path('user_canteen_list',CanteenList.as_view(), name='user_canteen_list_urls'),
+    # path('update_canteen_user',UpdateUser.as_view(), name='update_user_urls'),
+
 ]

@@ -22,6 +22,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 
+admin.site.site_header = "Visitor Management Admin"
+admin.site.site_title = "VMS Admin"
+admin.site.index_title = "Welcome to VMS Dashboard"
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 

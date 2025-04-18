@@ -31,7 +31,7 @@ class AppointmentAdmin(admin.ModelAdmin):
             'fields': ('company_name', 'company_address')
         }),
         ('Assignment & Tracking', {
-            'fields': ('assigned_to', 'created_by', 'updated_by')
+            'fields': ('gm','assigned_to', 'created_by', 'updated_by')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),

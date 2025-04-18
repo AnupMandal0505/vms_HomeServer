@@ -44,20 +44,39 @@ class AppointmentCreateView(BaseAuthentication):
                     })
                     index += 1
 
-                #  Create Main Appointment
-                appointment_data = Appointment.objects.create(
-                    visitor_name=data.get("visitor_name"),
-                    email=data.get("email"),
-                    phone=data.get("phone"),
-                    date=data.get("date"),
-                    assigned_to=request.user.gm,
-                    company_name=data.get("company_name"),
-                    company_address=data.get("company_address"),
-                    purpose_of_visit=data.get("purpose_of_visit"),
-                    visitor_img=files.get("visitor_img"),
-                    v_type=data.get("visitor_type"),
-                    created_by=request.user
-                )
+                if request.user.groups.filter(name="SECRETARY").exists():
+
+                    #  Create Main Appointment By SECRETARY
+                    appointment_data = Appointment.objects.create(
+                        visitor_name=data.get("visitor_name"),
+                        email=data.get("email"),
+                        phone=data.get("phone"),
+                        date=data.get("date"),
+                        gm=request.user.gm,
+                        assigned_to=request.user,
+                        company_name=data.get("company_name"),
+                        company_address=data.get("company_address"),
+                        purpose_of_visit=data.get("purpose_of_visit"),
+                        visitor_img=files.get("visitor_img"),
+                        v_type=data.get("visitor_type"),
+                        created_by=request.user
+                    )
+                else:
+
+                    #  Create Main Appointment By PA
+                    appointment_data = Appointment.objects.create(
+                        visitor_name=data.get("visitor_name"),
+                        email=data.get("email"),
+                        phone=data.get("phone"),
+                        date=data.get("date"),
+                        assigned_to=request.user.secretary,
+                        company_name=data.get("company_name"),
+                        company_address=data.get("company_address"),
+                        purpose_of_visit=data.get("purpose_of_visit"),
+                        visitor_img=files.get("visitor_img"),
+                        v_type=data.get("visitor_type"),
+                        created_by=request.user
+                    )
 
                 #  Prepare Additional Visitors List for Bulk Create
                 additional_visitors_list = []

@@ -81,11 +81,16 @@ class SECRETARYList(UserListView):
     group_name="SECRETARY"
 
 class PaList(UserListView):
-    # template = "dashboard/pa/user_list.html"
-    # model_name=User
-    # roles="pa"
     group_name="PA"
 
+
+
+class DisplayList(UserListView):
+    group_name="DISPLAY"
+
+
+class CanteenList(UserListView):
+    group_name="CANTEEN"
 
 
 
@@ -111,7 +116,10 @@ class AddUserView(View):
             # Create the user
             user = self.model_name.objects.create(phone=request.POST.get("phone"), first_name=request.POST.get("first_name"), last_name=request.POST.get("last_name"), email=request.POST.get("email"),password=make_password(request.POST.get("password")))
 
-    
+            if request.POST.get("gm"):
+                user.gm_id=request.POST.get("gm")
+                user.save()
+
             group = Group.objects.get(name=self.group_name)
             user.groups.add(group)
         messages.success(request,"Add User Successfull !")
@@ -129,6 +137,11 @@ class PaAddUser(AddUserView):
     group_name="PA"
 
 
+class DisplayAddUser(AddUserView):
+    group_name="DISPLAY"
+
+class CanteenAddUser(AddUserView):
+    group_name="CANTEEN"
 
 
 class UpdateUser(View):

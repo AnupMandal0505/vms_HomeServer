@@ -29,6 +29,14 @@ class Appointment(Modification):
         blank=True,
         related_name="assigned_appointments",limit_choices_to={'groups__name': 'GM'}
     ) 
+
+    gm = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="gm_appointments",limit_choices_to={'groups__name': 'GM'}
+    ) 
     company_name = models.CharField(max_length=100,default="NA")
     company_address = models.CharField(max_length=100,default="NA")
     purpose_of_visit = models.CharField(max_length=100,default="Na")

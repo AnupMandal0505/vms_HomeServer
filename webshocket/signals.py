@@ -45,6 +45,7 @@ def call_notify(sender, instance, **kwargs):
     if instance.read == False:
         # Serialize the filtered instance
         serialized_data = CallNotificationSerializer(instance).data
+
         async_to_sync(channel_layer.group_send)(
             'call_live',  
             {
@@ -54,7 +55,11 @@ def call_notify(sender, instance, **kwargs):
         )
 
 
+# utils.py
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=Order)
 def order_notify(sender, instance, **kwargs):
@@ -65,6 +70,8 @@ def order_notify(sender, instance, **kwargs):
     if instance.status == False and instance.created_at.date() == now().date():
         # Serialize the filtered instance
         serialized_data = GetOrderSerializer(instance).data
+        # logger.info(f"🟢 [INFO] Processing data: {serialized_data}")
+        # logger.error(f"🔴 [ERROR] Processing data: {serialized_data}")
 
         async_to_sync(channel_layer.group_send)(
             'order_live',  
