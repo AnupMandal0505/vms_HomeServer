@@ -55,29 +55,28 @@ def call_notify(sender, instance, **kwargs):
         )
 
 
-# utils.py
 
-import logging
-
-logger = logging.getLogger(__name__)
+from django.db import transaction
 
 @receiver(post_save, sender=Order)
 def order_notify(sender, instance, **kwargs):
+    """Queue the notification to happen after the transaction completes"""
+    transaction.on_commit(lambda: send_order_notification(instance))
+
+def send_order_notification(order_instance):
     """Send only relevant updates (Today's & Pending) to WebSocket group"""
     channel_layer = get_channel_layer()
     
     # Check if the instance is today's and has status 'pending'
-    if instance.status == False and instance.created_at.date() == now().date():
-        # Serialize the filtered instance
-        serialized_data = GetOrderSerializer(instance).data
-        # logger.info(f"🟢 [INFO] Processing data: {serialized_data}")
-        # logger.error(f"🔴 [ERROR] Processing data: {serialized_data}")
+    if order_instance.status == False and order_instance.created_at.date() == now().date():
+        # Serialize the filtered instance - now with OrderItems properly associated
+        serialized_data = GetOrderSerializer(order_instance).data
 
         async_to_sync(channel_layer.group_send)(
             'order_live',  
             {
                 'type': 'order_notify',
-                'data': serialized_data  # Sending only filtered data
+                'data': serialized_data
             }
         )
 

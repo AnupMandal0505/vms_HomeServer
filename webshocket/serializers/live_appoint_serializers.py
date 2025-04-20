@@ -10,7 +10,7 @@ class DisplayAppointmentSerializer(serializers.ModelSerializer):
     id = serializers.CharField()  # Appointment ID as string
     assigned_to = serializers.CharField(source='assigned_to_id', allow_null=True)  # FK ID as string, nullable
     created_by = serializers.CharField(source='created_by_id', allow_null=True)  # FK ID as string, nullable
-    gm_name = serializers.SerializerMethodField()  # ✅ To get assigned GM name
+    assign_name = serializers.SerializerMethodField()  # ✅ To get assigned GM name
     # company_display_name = serializers.SerializerMethodField()  # ✅ Custom field for company or visitor name
 
     class Meta:
@@ -18,7 +18,7 @@ class DisplayAppointmentSerializer(serializers.ModelSerializer):
         fields = [
             'id', 
             'assigned_to', 
-            'gm_name', 
+            'assign_name', 
             'company_name',
             'visitor_name',
             'status',
@@ -26,9 +26,16 @@ class DisplayAppointmentSerializer(serializers.ModelSerializer):
             'created_at'
         ]
 
-    def get_gm_name(self, obj):
-        return obj.assigned_to.first_name if obj.assigned_to else None
 
+    def get_assign_name(self, obj):
+        if obj.gm:
+            # logger.debug(f"GM: {obj.gm.first_name}")
+            return f"{obj.gm.first_name} {obj.gm.last_name}"
+
+        elif obj.assigned_to:
+            return f"{obj.assigned_to.first_name} {obj.assigned_to.last_name}"
+        else:
+            return None
    
 
 
@@ -52,10 +59,21 @@ class AppointmentSerializer(serializers.ModelSerializer):
     visitor_img = serializers.SerializerMethodField()  # ✅ Convert to full URL
     additional_visitors = AdditionalVisitorSerializer(many=True, read_only=True)
     # visitor_img = serializers.ImageField(required=False, allow_null=True)  # ✅ Fix: Allows file upload
+    assign_name = serializers.SerializerMethodField()  # ✅ To get assigned GM name
 
     class Meta:
         model = Appointment
         fields = "__all__"
+
+    def get_assign_name(self, obj):
+        if obj.gm:
+            # logger.debug(f"GM: {obj.gm.first_name}")
+            return f"{obj.gm.first_name} {obj.gm.last_name}"
+
+        elif obj.assigned_to:
+            return f"{obj.assigned_to.first_name} {obj.assigned_to.last_name}"
+        else:
+            return None
 
     def get_visitor_img(self, obj):
         """Convert visitor_img to full URL"""

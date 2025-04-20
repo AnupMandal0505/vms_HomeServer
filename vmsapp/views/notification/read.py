@@ -15,9 +15,23 @@ class BaseAuthentication(viewsets.ViewSet):
 class ContactList(BaseAuthentication):
     def list(self, request):
         try:
-            data=User.objects.filter(gm=request.GET.get("gm_id"))
-            serial=ContactListSerializer(data,many=True)
+            if request.user.groups =="GM":
+                data=User.objects.filter(gm=request.GET.get("gm_id"))
+                serial=ContactListSerializer(data,many=True)
             return Response({'RES':serial.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'message': 'Failed to log out'}, status=status.HTTP_400_BAD_REQUEST)
         
+class ContactList(BaseAuthentication):
+    def list(self, request):
+        try:
+            id = request.GET.get("id")
+
+            if request.user.groups.filter(name="GM").exists():
+                data = User.objects.filter(gm=id)
+            else:
+                data = User.objects.filter(secretary=id)
+            serial = ContactListSerializer(data, many=True)
+            return Response({'RES': serial.data}, status=status.HTTP_200_OK)        
+        except Exception as e:
+            return Response({'message': 'Failed to fetch contact list'}, status=status.HTTP_400_BAD_REQUEST)

@@ -1,6 +1,9 @@
 from django.db import models
 from authuser.models import User
 from uuid import uuid4
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+
 
 class Modification(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="%(class)s_created_by",limit_choices_to={'groups__name__in': ['PA', 'SECRETARY']})
@@ -39,7 +42,7 @@ class Appointment(Modification):
     ) 
     company_name = models.CharField(max_length=100,default="NA")
     company_address = models.CharField(max_length=100,default="NA")
-    purpose_of_visit = models.CharField(max_length=100,default="Na")
+    purpose_of_visit = models.CharField(max_length=100,default="NA")
     visitor_img = models.FileField(upload_to='visitor_img/%Y/%m/%d/',blank=True) 
     v_type = models.CharField(max_length=100, default="OUTSIDE",blank=True,null=True)
 
@@ -78,6 +81,11 @@ class AdditionalVisitor(models.Model):
             
     def __str__(self):
         return self.name
+    
+@receiver(post_delete, sender=AdditionalVisitor)
+def delete_file(sender, instance, **kwargs):
+    if instance.img:
+        instance.img.delete(save=False)
     
 
 

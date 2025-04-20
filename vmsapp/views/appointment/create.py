@@ -27,6 +27,7 @@ class BaseAuthentication(viewsets.ViewSet):
 
 
 
+
 class AppointmentCreateView(BaseAuthentication):
     parser_classes = [MultiPartParser, FormParser]
 
@@ -107,7 +108,7 @@ class AppointmentCreateView(BaseAuthentication):
                     appointment_data.visitor_name,
                     appointment_data.email,
                     appointment_data.date,
-                    f"{request.user.secretary.first_name} {request.user.secretary.last_name}",
+                    f"{request.user} {request.user}",
                     additional_visitors_name,
                     "Appointment Confirmation",
                     "message"
@@ -128,8 +129,9 @@ class AppointmentForwardGmView(BaseAuthentication):
 
     def create(self, request):
         try:
-            appoint=Appointment.objects.get(id=request.data.get("id"))
+            appoint=Appointment.objects.get(id=request.data.get("visitor_id"))
             appoint.gm=request.user.gm
+            appoint.status=request.data.get("action","pending")
             appoint.save()
         
             #  Return success response if everything went fine

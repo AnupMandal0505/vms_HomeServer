@@ -8,8 +8,16 @@ from rest_framework import viewsets
 from authuser.models import User
 from rest_framework import status
 
+
+
+import logging
+
+logger = logging.getLogger(__name__)
+
 class LoginAPI(viewsets.ViewSet):
     def create(self, request):
+        # logger.error(f"🔴 [ERROR] Processing data: {user}")
+
         try:
             serializer = LoginSerializer(data=request.data)
             if serializer.is_valid():

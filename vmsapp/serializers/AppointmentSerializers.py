@@ -19,7 +19,7 @@ class AdditionalVisitorSerializer(serializers.ModelSerializer):
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
-    assigned_to = serializers.SerializerMethodField()
+    assign_name = serializers.SerializerMethodField()
     visitor_img = serializers.SerializerMethodField()  
     additional_visitors = AdditionalVisitorSerializer(many=True, read_only=True)
 
@@ -34,12 +34,27 @@ class AppointmentSerializer(serializers.ModelSerializer):
         else:
             return 'https://i.pinimg.com/474x/0a/a8/58/0aa8581c2cb0aa948d63ce3ddad90c81.jpg'  # yahaan aap apni default image ka URL daalein
     
-    def get_assigned_to(self, obj):
-        """Return assigned user's full name or username"""
-        if obj.assigned_to:
-            full_name = f"{obj.assigned_to.first_name} {obj.assigned_to.last_name}".strip()
-            return full_name if full_name else obj.assigned_to.phone  
-        return None
+    # def get_assign_name(self, obj):
+    #     """Return assigned user's full name or username"""
+    #     if obj.gm:
+    #         full_name = f"{obj.gm.first_name} {obj.gm.last_name}".strip()
+    #         return full_name if full_name else obj.gm.phone  
+
+    #     elif obj.assigned_to:
+    #         full_name = f"{obj.assigned_to.first_name} {obj.assigned_to.last_name}".strip()
+    #         return full_name if full_name else obj.assigned_to.phone  
+
+    #     return None
+
+    def get_assign_name(self, obj):
+        if obj.gm:
+            # logger.debug(f"GM: {obj.gm.first_name}")
+            return f"{obj.gm.first_name} {obj.gm.last_name}"
+
+        elif obj.assigned_to:
+            return f"{obj.assigned_to.first_name} {obj.assigned_to.last_name}"
+        else:
+            return None
     
 
 
