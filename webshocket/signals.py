@@ -161,6 +161,9 @@ logger = logging.getLogger(__name__)  # Use the current module name
 @receiver(post_save, sender=GMTraffic)
 @receiver(post_save, sender=Appointment)
 def send_update(sender, instance, **kwargs):
+    if not instance.gm:
+        # GM is None, do not proceed
+        return
     # Only send the update if the status has changed or appointment is created or deleted
     channel_layer = get_channel_layer()
 
