@@ -114,8 +114,26 @@ class AppointmentCreateView(BaseAuthentication):
                     "message"
                 )
 
+            try:
+
+                if RegularVisitor.objects.filter(phone=data.get("phone")).exists():
+                    return Response({"ERR": False, "message": "Already Registered Phone"}, status=status.HTTP_200_OK)
+                
+                RegularVisitor.objects.create(
+                    name=data.get("visitor_name"),
+                    v_type=data.get('visitor_type', 'outside'),
+                    phone=data.get('phone'),
+                    email=data.get('email'),
+                    company_name=data.get('company_name', 'Na'),
+                    company_address=data.get('company_address', 'NA'),
+                    image=files.get("visitor_img"),
+                    created_by=request.user            )
+                return Response({"message": "Appointment and Additional Visitors created successfully."}, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                print(" Error Occurred:", e)
+                logger.info(f"🟢 Error: {e}")
+                return Response({"message": " Saved Appointment Not created successfully. But Apppointment Done"}, status=status.HTTP_400_BAD_REQUEST)
             #  Return success response if everything went fine
-            return Response({"message": "Appointment and Additional Visitors created successfully."}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             print(" Error Occurred:", e)
