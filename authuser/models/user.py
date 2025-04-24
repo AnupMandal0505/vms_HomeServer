@@ -79,3 +79,18 @@ class User(AbstractUser):
         group_name = first_group.name if first_group else "No Group"
 
         return f"{first_name} {last_name} ({group_name})"
+
+
+
+class GMTraffic(models.Model):
+    status = models.BooleanField(default=False)
+    gm = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="gm_traffic",limit_choices_to={'groups__name': 'GM'}
+    ) 
+
+    class Meta:
+            db_table = "gm_traffic"

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Audio Call</title>
+    <style>
+        #controls {
+            margin-top: 10px;
+        }
+
+        audio {
+            display: block;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Audio Call WebSocket</h1>
+    <div id="status">Not connected</div>
+    <div id="local-audio"></div>
+    <div id="remote-audio"></div>
+
+    <div id="controls">
+        <button id="start-call">Start Call</button>
+        <button id="accept-call" style="display:none;">Accept</button>
+        <button id="reject-call" style="display:none;">Reject</button>
+    </div>
+
+    <script>
+        const token = "{{ token }}";
+        const targetUserId = "{{ user_id }}";
+    
+        let peerConnection;
+        let localStream;
+        let pendingOffer = null;
+        const startCallBtn = document.getElementById("start-call");
+        const acceptCallBtn = document.getElementById("accept-call");
+        const rejectCallBtn = document.getElementById("reject-call");
+        const statusDiv = document.getElementById("status");
+    
+        const socket = new WebSocket("ws://172.22.226.236:4002/ws/audio_call/?token=" + token);
+    
+        socket.onopen = () => {
+            statusDiv.innerText = "Connected to WebSocket";
+        };
+    
+        socket.onmessage = async (event) => {
+            const data = JSON.parse(event.data);
+            console.log("Message from server:", data);
+    
+            if (data.sdp) {
+                if (data.sdp.type === 'offer') {
+                    statusDiv.innerText = "Incoming Call...";
+                    pendingOffer = data.sdp;
+                    acceptCallBtn.style.display = 'inline-block';
+                    rejectCallBtn.style.display = 'inline-block';
+                } else if (data.sdp.type === 'answer') {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+                    statusDiv.innerText = "Call Connected";
+                }
+            }
+    
+            if (data.candidate) {
+                if (peerConnection) {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                }
+            }
+    
+            if (data.type === 'call_rejected') {
+                statusDiv.innerText = "Call Rejected by receiver";
+                startCallBtn.style.display = 'inline-block';  // Show start call again
+            }
+        };
+    
+        socket.onclose = () => {
+            statusDiv.innerText = "Disconnected";
+        };
+    
+        startCallBtn.onclick = async () => {
+            await startLocalStream();
+            await createPeerConnection();
+    
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+    
+            socket.send(JSON.stringify({
+                sdp: offer,
+                target: targetUserId
+            }));
+    
+            statusDiv.innerText = "Calling...";
+            startCallBtn.style.display = 'none'; // Hide button while calling
+        };
+    
+        acceptCallBtn.onclick = async () => {
+            acceptCallBtn.style.display = 'none';
+            rejectCallBtn.style.display = 'none';
+    
+            await startLocalStream();
+            await createPeerConnection();
+    
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(pendingOffer));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+    
+            socket.send(JSON.stringify({
+                sdp: answer,
+                target: targetUserId
+            }));
+    
+            statusDiv.innerText = "Call Connected";
+        };
+    
+        rejectCallBtn.onclick = () => {
+            statusDiv.innerText = "Call Rejected";
+            pendingOffer = null;
+            acceptCallBtn.style.display = 'none';
+            rejectCallBtn.style.display = 'none';
+    
+            // Notify the caller that the call was rejected
+            socket.send(JSON.stringify({
+                type: 'call_rejected',
+                target: targetUserId
+            }));
+        };
+    
+        async function startLocalStream() {
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const audio = document.createElement('audio');
+            audio.srcObject = localStream;
+            audio.autoplay = true;
+            audio.controls = true;
+            document.getElementById("local-audio").appendChild(audio);
+        }
+    
+        async function createPeerConnection() {
+            peerConnection = new RTCPeerConnection();
+    
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    socket.send(JSON.stringify({
+                        candidate: event.candidate,
+                        target: targetUserId
+                    }));
+                }
+            };
+    
+            peerConnection.ontrack = (event) => {
+                const remoteAudio = document.createElement('audio');
+                remoteAudio.srcObject = event.streams[0];
+                remoteAudio.autoplay = true;
+                remoteAudio.controls = true;
+                document.getElementById("remote-audio").appendChild(remoteAudio);
+            };
+    
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
+            });
+        }
+    </script>
+    
+</body>
+
+</html>

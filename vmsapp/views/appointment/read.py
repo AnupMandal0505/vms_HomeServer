@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework import status
-from authuser.models import Appointment,AdditionalVisitor,RegularVisitor
+from authuser.models import Appointment,AdditionalVisitor,RegularVisitor,GMTraffic
 from vmsapp.serializers.AppointmentSerializers import AppointmentSerializer,RegularVisitorSerializer
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication,SessionAuthentication
@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import NotFound
 from django.core.paginator import EmptyPage
+from django.db.models import Q
+from django.utils import timezone
 
 
 
@@ -136,86 +138,79 @@ class GetRegularVisitor(BaseAuthentication):
 
         try:
             if phone:
-                visitors = RegularVisitor.objects.filter(phone=phone)
+                # visitors = RegularVisitor.objects.filter(name__iexact=phone)
+                visitors = RegularVisitor.objects.filter(Q(name__icontains=phone) | Q(phone__icontains=phone))
             else:
-                # If phone not provided, filter all Inoffice visitors
+                            # If phone not provided, filter all Inoffice visitors
                 visitors = RegularVisitor.objects.filter(v_type="IN-OFFICE")
             return Response({"RES":True,"data":RegularVisitorSerializer(visitors, many=True).data})
         except RegularVisitor.DoesNotExist:
             return Response({"ERR": "Visitor not found"}, status=404)
 
+from datetime import date
 
-# from django.http import JsonResponse
-# from collections import OrderedDict
-# from django.conf import settings
-
-# class Get_unique_visitor_list(BaseAuthentication):
-#     def list(self,request):
-#         # Step 1: Get Appointment data
-#         appointment_data = Appointment.objects.values('visitor_name', 'phone')
-#         appointment_list = [
-#             {"name": a["visitor_name"], "phone": a["phone"]}
-#             for a in appointment_data
-#         ]
-        
-#         # Step 2: Get AdditionalVisitor data
-#         additional_data = AdditionalVisitor.objects.select_related('participants').values(
-#             'name', 'participants__phone'
-#         )
-#         additional_list = [
-#             {"name": a["name"], "phone": a["participants__phone"]}
-#             for a in additional_data
-#         ]
-
-#         # Step 3: Combine & make unique based on (name, phone)
-#         combined = appointment_list + additional_list
-#         seen = set()
-#         unique_data = []
-#         for item in combined:
-#             key = (item["name"], item["phone"])
-#             if key not in seen:
-#                 seen.add(key)
-#                 unique_data.append(item)
-
-#         return JsonResponse(unique_data, safe=False)
-
-
-# class Get_unique_visitor_list(BaseAuthentication):
-#     def list(self, request):
-#         # Step 1: Get Appointment data
-#         appointment_data = Appointment.objects.values('visitor_name', 'phone', 'visitor_img')
-#         appointment_list = [
-#             {
-#                 "name": a["visitor_name"],
-#                 "phone": a["phone"],
-#                 "img": f"{settings.API_BASE_URL}/{a['visitor_img']}" if a["visitor_img"] else None
-#             }
-#             for a in appointment_data
-#         ]
-        
-#         # Step 2: Get AdditionalVisitor data
-#         additional_data = AdditionalVisitor.objects.select_related('participants').values(
-#             'name', 'img', 'participants__phone'
-#         )
-#         additional_list = [
-#             {
-#                 "name": a["name"],
-#                 "phone": a["participants__phone"],
-#                 "img": f"{settings.API_BASE_URL}/{a['img']}" if a["img"] else None
-#             }
-#             for a in additional_data
-#         ]
-
-#         # Step 3: Combine & make unique based on (name, phone)
-#         combined = appointment_list + additional_list
-#         seen = set()
-#         unique_data = []
-#         for item in combined:
-#             key = (item["name"], item["phone"])
-#             if key not in seen:
-#                 seen.add(key)
-#                 unique_data.append(item)
-
-#         return JsonResponse(unique_data, safe=False)
     
+import logging
 
+logger = logging.getLogger(__name__)
+
+class GetGmBussyMode(BaseAuthentication):
+    def list(self, request):
+        # Get the gm_id from the request
+        user = request.user
+      
+        try:
+            logger.info("✅ Status updated successfully!1w")
+
+            # Check GMTraffic for the given GM
+            gm_traffic = GMTraffic.objects.get(gm=user.gm)
+            logger.info("✅ Status updated successfully!1",gm_traffic)
+
+            # If GMTraffic status is True, return 'busy'
+            if gm_traffic.status:
+                return Response({'status': 'busy'})
+            
+            # If GMTraffic status is False, check today's appointments
+            # today = timezone.now().date()
+            today = date.today()
+
+            logger.info("✅ Status updated successfully!2",today)
+
+            has_progress = Appointment.objects.filter(
+                gm=user.gm,
+                date=today,
+                status__iexact="progress"
+            ).exists()
+            logger.info("✅ Status updated successfully!3",has_progress)
+
+            # If there's an in-progress appointment today, return 'progress'
+            if has_progress:
+                return Response({'status': 'progress'})
+            
+            # If no in-progress appointments, return 'available'
+            return Response({'status': 'available'})
+
+        except GMTraffic.DoesNotExist:
+            return Response({'error': 'GM Traffic record not found'}, status=404)
+
+
+from django.shortcuts import render
+
+
+
+
+def audio_call(request):
+    return render(request, 'index.html', {
+        'token': "b3d7ac56a9c1bb36e7b52fd28622da55c2edf1fe",
+        'user_id': "81ff0ca0-4fc8-42a8-a1ec-e7f9e5944e63"  # Pass target user ID dynamically
+
+    })
+
+def audio_call2(request):
+    # Assuming you want to send the token dynamically (you can pass the token or user-related data here)
+    # user_token = request.user.auth_token.key if request.user.is_authenticated else None
+
+    return render(request, 'check.html', {
+        'token': "56b2abd4d84331d0149fbaaeac7afe7b799cf50d",
+        'user_id': "d42a6d4f-1a0a-42f5-85af-08cd521e56c3"  # You can make this dynamic
+    })

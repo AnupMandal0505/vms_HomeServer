@@ -1,95 +1,128 @@
-<!-- index.html -->
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>Index Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Call WebSocket</title>
 </head>
-
 <body>
-    <h1 id="index-page-data"></h1>
-
-
+    <h1>Audio Call WebSocket</h1>
+    <button id="start-call">Start Call</button>
+    <div id="status"></div>
+    <div id="local-video"></div>
+    
     <script>
-        var socket = new WebSocket('ws://127.0.0.1:4003/ws/gm_visitors/?gm_user_id=23c17169-599e-4792-874f-ea03637e7af0');
-        // var socket = new WebSocket('ws://192.168.54.224:4002/ws/call/a465b8f0-175f-4323-b160-4b1e182da268/');
-        // var socket = new WebSocket('ws://192.168.200.224:4002/ws/gm_visitors/?user_id=ee3060f0-9d60-41b3-a83b-b9b967b493bf/');
+        const token = "{{ token }}";  // Get the token passed from the Django view
+        if (!token) {
+            document.getElementById("status").innerText = "Error: You are not logged in!";
+            return;
+        }
 
-        socket.onopen = function (event) {
-            console.log("✅ WebSocket connected!");
+        let peerConnection;
+        let localStream;
+        const socket = new WebSocket("ws://localhost:8000/ws/audio_call/?token=" + token);
 
-            // // Send filter parameters
-            // socket.send(JSON.stringify({
-            //     created_by_id: "85b3f997-2151-43b7-95c8-1aea997ad833",
-            //     role: "created_by"
-            // }));
-
-            // Start periodic heartbeat to keep connection alive
-            // setInterval(() => {
-            //     if (socket?.readyState === WebSocket.OPEN) {
-            //         socket.send(JSON.stringify({
-            //             type: "ping",
-            //             created_by_id: "85b3f997-2151-43b7-95c8-1aea997ad833",  // Ensure user ID is sent in ping
-            //             role: "created_by"
-            //         }));
-            //         console.log("🔄 Sent ping with user_id to server.");
-            //     }
-            // }, 30000); // Every 30 seconds
-
+        socket.onopen = function(event) {
+            document.getElementById("status").innerText = "Connected to WebSocket";
         };
 
-        socket.onmessage = function (event) {
-            console.log('📩 Received:', event.data);
-            const message = JSON.parse(event.data);
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            console.log("Message from server:", data);
+            
+            if (data.sdp) {
+                console.log("Received SDP:", data.sdp);
+                if (data.sdp.type === 'offer') {
+                    handleIncomingOffer(data.sdp);
+                }
+            }
 
-            if (message.type === "ping") {
-                console.log("🔄 Ping received, connection is active.");
-            } else if (message.type === "call_notify") {
-                document.getElementById('index-page-data').innerHTML = JSON.stringify(message.data);
-            } else if (message.type === "update_index_page") {
-                document.getElementById('index-page-data').innerHTML = JSON.stringify(message.data);
+            // ICE candidates
+            if (data.candidate) {
+                peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
             }
         };
 
-        socket.onerror = function (event) {
-            console.log('❌ WebSocket error:', event);
+        socket.onclose = function(event) {
+            document.getElementById("status").innerText = "Disconnected from WebSocket";
         };
 
-        socket.onclose = function (event) {
-            console.log(`❌ WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`);
+        socket.onerror = function(event) {
+            document.getElementById("status").innerText = "Error with WebSocket connection";
         };
+
+        document.getElementById("start-call").addEventListener("click", async function() {
+            try {
+                // Start local media stream (microphone)
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const localAudio = document.createElement('audio');
+                localAudio.srcObject = localStream;
+                localAudio.play();
+                document.getElementById("local-video").appendChild(localAudio);
+
+                // Create peer connection
+                peerConnection = new RTCPeerConnection();
+                peerConnection.addEventListener('icecandidate', handleIceCandidate);
+                peerConnection.addEventListener('track', handleTrack);
+
+                // Add local stream to the peer connection
+                localStream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, localStream);
+                });
+
+                // Send the SDP offer to the server
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+
+                const message = {
+                    sdp: offer,
+                    target: targetUserId    // Replace with the actual target user ID
+                };
+
+                socket.send(JSON.stringify(message));
+                document.getElementById("status").innerText = "Calling...";
+            } catch (err) {
+                console.error('Error accessing media devices: ', err);
+            }
+        });
+
+        async function handleIncomingOffer(offer) {
+            try {
+                // Set the received offer as the remote description
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+
+                // Create an answer to the offer
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+
+                // Send the answer back to the server
+                const message = {
+                    sdp: answer,
+                    target: targetUserId    // Replace with the actual target user ID
+                };
+                socket.send(JSON.stringify(message));
+
+                document.getElementById("status").innerText = "Connected to the call";
+            } catch (err) {
+                console.error('Error handling incoming offer: ', err);
+            }
+        }
+
+        function handleIceCandidate(event) {
+            if (event.candidate) {
+                const message = {
+                    candidate: event.candidate,
+                    target: targetUserId    // Replace with the actual target user ID
+                };
+                socket.send(JSON.stringify(message));
+            }
+        }
+
+        function handleTrack(event) {
+            const remoteAudio = document.createElement('audio');
+            remoteAudio.srcObject = event.streams[0];
+            remoteAudio.play();
+        }
     </script>
-    <!-- // index.html -->
-    <!-- <script>
-    // var socket = new WebSocket('wss://srv-ddky.onrender.com/ws/appointment/');
-    var socket = new WebSocket('ws://localhost:8000/ws/appointment/');
-        socket.onopen = function(event) {
-            console.log("WebSocket connected!");
-
-            // Send filter parameters
-            socket.send(JSON.stringify({
-                status: "pending",
-                // date: "2025-02-04",
-                created_by_id: "85b3f997-2151-43b7-95c8-1aea997ad833",
-                role: "assigned_to"  // OR "created_by"
-            }));
-        };
-        
-
-    socket.onmessage = function(event) {
-        console.log('Received data:', event.data);
-        document.getElementById('index-page-data').innerHTML = event.data;
-    };
-
-
-    socket.onerror = function(event) {
-        console.log('WebSocket error:', event);
-    };
-
-    socket.onclose = function(event) {
-        console.log('WebSocket connection closed.');
-    };
-</script> -->
 </body>
-
 </html>

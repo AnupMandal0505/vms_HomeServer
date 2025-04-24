@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from authuser.models import User
+from authuser.models import User,GMTraffic
 from django.utils.translation import gettext_lazy as _
 
 
@@ -18,7 +18,7 @@ class CustomUserAdmin(UserAdmin):
     )
     
     # List display settings
-    list_display = ('phone', 'first_name', 'email','get_groups', 'is_staff', 'is_active', 'date_joined')
+    list_display = ('id','phone', 'first_name', 'email','get_groups', 'is_staff', 'is_active', 'date_joined')
     
     # Search fields
     search_fields = ('phone', 'first_name', 'last_name', 'email')
@@ -60,7 +60,11 @@ admin.site.register(User, CustomUserAdmin)
 
 
 
-
+@admin.register(GMTraffic)
+class GMTrafficAdmin(admin.ModelAdmin):
+    list_display = ("id", "gm", "status")  # Show columns in admin list view
+    list_filter = ("status", "gm")         # Add sidebar filters
+    search_fields = ("gm__username",)      # Enable search by GM username
 
 
 

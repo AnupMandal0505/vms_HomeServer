@@ -6,7 +6,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         """Create groups without permissions"""
-        group_names = ['GM', 'PA', 'OP','NONE','SECRETARY','DISPLAY','CANTEEN']
+        group_names = ['GM', 'PA', 'OP','USER','SECRETARY','DISPLAY','CANTEEN']
 
         for group_name in group_names:
             group, created = Group.objects.get_or_create(name=group_name)

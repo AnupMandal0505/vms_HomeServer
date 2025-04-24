@@ -20,7 +20,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
-
+# from vmsapp.views.appointment.read import audio_call,audio_call2
 
 admin.site.site_header = "Visitor Management Admin"
 admin.site.site_title = "VMS Admin"
@@ -34,6 +34,9 @@ urlpatterns = [
     # path('realtime', include('demo.urls')),
     # path('api/', include('webshocket.urls')),
     path('', include('frontent.urls',namespace="frontent")),
+    # path('audio_call/', audio_call, name='audio_call'),
+    # path('audio_call2/', audio_call2, name='audio_call2'),
+
 ]
 
 # Serve media files in development mode

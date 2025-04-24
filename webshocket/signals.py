@@ -2,15 +2,17 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from authuser.models import Appointment
-from webshocket.serializers.live_appoint_serializers import DisplayAppointmentSerializer,AppointmentSerializer
+from authuser.models import Appointment,GMTraffic
+from webshocket.serializers.live_appoint_serializers import DisplayAppointmentSerializer,AppointmentSerializer,GmTrafficSerializer
 from authuser.models import CallNotification,Order
 from webshocket.serializers.call_serializers import CallNotificationSerializer
 from webshocket.serializers.canteen_serializers import GetOrderSerializer
 from django.utils.timezone import now
 
+channel_layer = get_channel_layer()
 
 
+# @receiver(post_save, sender=GMTraffic)
 @receiver(post_save, sender=Appointment)
 def update_index_page(sender, instance, **kwargs):
     """Send only relevant updates to WebSocket group"""
@@ -112,3 +114,100 @@ def serialize_data(data):
     elif isinstance(data, uuid.UUID):  # Convert UUIDs to strings
         return str(data)
     return data
+
+
+
+
+
+# AudioCalll..................
+# from pyfcm import FCMNotification
+
+# def send_push_notification(token, title, body):
+#     push_service = FCMNotification(api_key='aebed3b20d156d31e4a1abafcaa4ab944b4138e5')
+#     result = push_service.notify_single_device(
+#         registration_id=token,
+#         message_title=title,
+#         message_body=body
+#     )
+#     return result
+
+# @receiver(post_save, sender=Appointment)
+# def send_update(sender, instance, **kwargs):
+#     # Only send the update if the status has changed or appointment is created or deleted
+#     channel_layer = get_channel_layer()
+
+#     # Prepare the data to send, ensure you convert UUID to string
+#     data = {
+#         # 'id': str(instance.id),
+#         'status': instance.status,  # Assuming 'status' is part of the Appointment model
+#         'gm_id': str(instance.gm.id) if instance.gm else None,  # gm_id as string
+#     }
+
+#     # Broadcast the status update to the appropriate group
+#     async_to_sync(channel_layer.group_send)(
+#         f'gm_{instance.gm.id}',  # Group based on gm_id
+#         {
+#             'type': 'appointment_status_update',
+#             'data': data,
+#         }
+#     )
+
+from django.utils import timezone
+import logging
+from datetime import date
+# Get the logger instance
+logger = logging.getLogger(__name__)  # Use the current module name
+
+@receiver(post_save, sender=GMTraffic)
+@receiver(post_save, sender=Appointment)
+def send_update(sender, instance, **kwargs):
+    # Only send the update if the status has changed or appointment is created or deleted
+    channel_layer = get_channel_layer()
+
+    # Get today's date for the serializer
+    # today = timezone.now().date()
+    today = date.today()
+
+    # Serialize the Appointment data along with the status logic
+    gm_traffic = GMTraffic.objects.filter(gm=instance.gm).first() if instance.gm else None
+    if instance.gm:
+        # Here, we are using the custom logic from your GmTrafficSerializer
+        traffic_data = {
+            'id': str(instance.id),
+            'gm': str(instance.gm.id),  # Assuming gm is a ForeignKey to the GM model
+            'status': 'available',  # Default status
+        }
+
+        # Check if GM is assigned and compute the status
+        if not instance.gm:
+            traffic_data['status'] = "available"
+        elif gm_traffic and gm_traffic.status:
+            traffic_data['status'] = "busy"
+        else:
+            has_progress = Appointment.objects.filter(
+                gm=instance.gm,
+                date=today,
+                status="progress"
+            ).exists()
+            logger.info(f'Successful operation: {has_progress} ✅')
+
+            if has_progress:
+                traffic_data['status'] = "progress"
+            else:
+                traffic_data['status'] = "available"
+
+    # Prepare the data to send to WebSocket client
+    data = {
+        'status': traffic_data['status'],
+        'gm_id': traffic_data['gm'],  # gm_id as string
+    }
+
+    # Broadcast the status update to the appropriate group
+    if instance.gm:
+        async_to_sync(channel_layer.group_send)(
+            f'gm_{instance.gm.id}',  # Group based on gm_id
+            {
+                'type': 'appointment_status_update',
+                'data': data,
+            }
+        )

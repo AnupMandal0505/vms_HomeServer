@@ -1,7 +1,7 @@
 # demo/routing.py
 from django.urls import re_path
 
-from .consumers import appointment_consumers,call_consumer,canteen_consumer,gm_visitor_consumer,pa_visitor_consumer
+from .consumers import appointment_consumers,call_consumer,canteen_consumer,gm_visitor_consumer,pa_visitor_consumer,AudioCall,displaytraffic
 
 websocket_urlpatterns = [
     re_path('ws/appointment/$', appointment_consumers.IndexPageConsumer.as_asgi()),
@@ -12,6 +12,7 @@ websocket_urlpatterns = [
     
     re_path('ws/gm_visitors/$', gm_visitor_consumer.AppointmentConsumer.as_asgi()),
     re_path('ws/pa_visitors/$', pa_visitor_consumer.AppointmentConsumer.as_asgi()),
+    re_path('ws/audio_call/$', AudioCall.CallConsumer.as_asgi()),
+    re_path(r'ws/appointment-status/(?P<gm_id>[0-9a-f-]+)/$',displaytraffic.AppointmentStatusConsumer.as_asgi()),
 
 ]
-

@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework import status
-from authuser.models import Appointment
+from authuser.models import Appointment,GMTraffic
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication,SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -51,3 +51,23 @@ class CallVisitorView(BaseAuthentication):
         except Appointment.DoesNotExist:
             return Response({'error': 'Visitor action not found'}, status=status.HTTP_404_NOT_FOUND)
    
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class GmBussyMode(BaseAuthentication):
+    def create(self, request):
+        gm_id = request.user.gm
+
+        if not gm_id:
+            return Response({'error': 'visitor_id and remark are required'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            gmBussy = GMTraffic.objects.get(gm_id=gm_id)
+            gmBussy.status = request.data.get('status')
+            gmBussy.save()
+            return Response({'success': 'Remark updated successfully'}, status=status.HTTP_200_OK)
+
+        except Appointment.DoesNotExist:
+            return Response({'error': 'Visitor remark not found'}, status=status.HTTP_404_NOT_FOUND)
+        

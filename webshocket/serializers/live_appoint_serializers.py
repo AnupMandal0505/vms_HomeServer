@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from authuser.models import Appointment,AdditionalVisitor
+from authuser.models import Appointment,AdditionalVisitor,GMTraffic
 from urllib.parse import urljoin
 from django.conf import settings
 from urllib.parse import urljoin
@@ -82,3 +82,40 @@ class AppointmentSerializer(serializers.ModelSerializer):
         else:
             return 'https://i.pinimg.com/474x/0a/a8/58/0aa8581c2cb0aa948d63ce3ddad90c81.jpg'  # yahaan aap apni default image ka URL daalein
     
+
+
+
+from django.utils import timezone
+from datetime import date
+
+class GmTrafficSerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Appointment
+        fields = ['id', 'gm', 'status']
+
+    def get_status(self, obj):
+        # today = timezone.now().date()
+        today = date.today()
+
+        # Check if GM is assigned
+        if not obj.gm:
+            return "available"
+
+        # Check GMTraffic for that GM
+        gm_traffic = GMTraffic.objects.filter(gm=obj.gm).first()
+        if gm_traffic and gm_traffic.status:
+            return "busy"
+
+        # Check if there's any progress appointment for today with same GM
+        has_progress = Appointment.objects.filter(
+            gm=obj.gm,
+            date=today,
+            status__iexact="progress"
+        ).exclude(id=obj.id).exists()
+
+        if has_progress:
+            return "progress"
+
+        return "available"

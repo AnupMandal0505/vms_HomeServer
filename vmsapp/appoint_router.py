@@ -1,6 +1,7 @@
 
 from django.urls import path,include
-from vmsapp.views import (AppointmentCreateView,AppointmentForwardGmView,AppointmentListView,AppointmentUpdateView,DeleteAppointmentView,CallVisitorView,RegularVisitorCreate,GetRegularVisitor)
+from vmsapp.views import (AppointmentCreateView,AppointmentForwardGmView,AppointmentListView,AppointmentUpdateView,
+                          DeleteAppointmentView,CallVisitorView,RegularVisitorCreate,GetRegularVisitor,GmBussyMode,GetGmBussyMode)
 from rest_framework.routers import SimpleRouter
 
 appointment = SimpleRouter()
@@ -13,6 +14,8 @@ appointment.register('update-appointments', AppointmentUpdateView, basename='upd
 # appointment.register('unique-visitors', Get_unique_visitor_list, basename='unique-visitors')
 appointment.register('delete-appointments', DeleteAppointmentView, basename='delete-appointments')
 appointment.register('call-action', CallVisitorView, basename='call-action-visitor')
+appointment.register('GmDoNotDisturb', GmBussyMode, basename='GmDoNotDisturb')
+appointment.register('get-GmDoNotDisturb', GetGmBussyMode, basename='get-GmDoNotDisturb')
 
 
 
